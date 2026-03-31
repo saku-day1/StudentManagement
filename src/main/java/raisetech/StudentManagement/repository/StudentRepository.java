@@ -70,7 +70,7 @@ public interface StudentRepository {
                     age = #{age},
                     gender = #{gender},
                     remarks = #{remarks},
-                    deleted = #{deleted}
+                    is_deleted = #{deleted}
                 WHERE id = #{id}
             """)
     void updateStudent(Student student);
