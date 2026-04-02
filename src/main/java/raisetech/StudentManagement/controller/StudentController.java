@@ -6,22 +6,22 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentsCourses;
-import raisetech.StudentManagement.domein.StudentDetail;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
 
 import java.util.Arrays;
 import java.util.List;
 
+
 @Controller
 public class StudentController {
 
-    private StudentService service;
-    private StudentConverter converter;
+    private final StudentService service;
+    private final StudentConverter converter;
 
     @Autowired
 
@@ -29,29 +29,16 @@ public class StudentController {
         this.service = service;
         this.converter = converter;
     }
+    //Controllerで画面に表示する。
 
     @GetMapping("/studentList")
-    public String getStudentsList(Model model) {
+    public List<StudentDetail> getStudentsList() {
         List<Student> students = service.searchStudentList();
         List<StudentsCourses> studentsCourses = service.searchStudentCourseList();
-        model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
-        return "studentList";
+        return converter.convertStudentDetails(students, studentsCourses);
     }
 
-    @GetMapping("/student/{id}")
-    public String searchStudent(@PathVariable String id, Model model) {
-        StudentDetail studentDetail = service.searchStudent(id);
-        if (studentDetail.getStudentCourse() == null) {
-            StudentsCourses sc = new StudentsCourses();
-            sc.setStudentId(studentDetail.getStudent().getId());
-            studentDetail.setStudentCourse(sc);
-        }
-        model.addAttribute("studentDetail", studentDetail);
-        return "updateStudent";
-
-
-    }
-
+    //新規登録画面
     @GetMapping("/newStudent")
     public String newStudent(Model model) {
         StudentDetail studentDetail = new StudentDetail();
@@ -60,7 +47,7 @@ public class StudentController {
         return "registerStudent";
     }
 
-
+    //登録処理
     @PostMapping("/registerStudent")
     public String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
         if (result.hasErrors()) {
@@ -69,16 +56,7 @@ public class StudentController {
         service.registerStudent(studentDetail);
         return "redirect:/studentList";
     }
-
-
-    @PostMapping("/updateStudent")
-    public String updateStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
-        if (result.hasErrors()) {
-            return "updateStudent";
-        }
-        service.updateStudent(studentDetail);
-        return "redirect:/studentList";
-
-    }
 }
+
+
 
