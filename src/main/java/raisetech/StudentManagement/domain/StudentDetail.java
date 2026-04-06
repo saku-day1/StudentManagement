@@ -1,16 +1,24 @@
 package raisetech.StudentManagement.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import raisetech.StudentManagement.data.Student;
-import raisetech.StudentManagement.data.StudentsCourses;
+import raisetech.StudentManagement.data.StudentCourse;
 
 import java.util.List;
 
+/**
+ * 生徒情報とコース情報をもつオブジェクト
+ */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentDetail {
     private Student student;
-    private List<StudentsCourses> studentCourses;
+    private List<StudentCourse> studentCourseList;
 
 }
+

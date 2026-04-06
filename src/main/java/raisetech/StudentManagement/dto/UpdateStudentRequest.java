@@ -24,12 +24,11 @@ public class UpdateStudentRequest {
 
     private String nickname;
     private String area;
-    private Integer age;
+    private int age;
     private String gender;
     private String remarks;
     private boolean deleted;
 
-    //コース情報の入力を必須にする
     @NotBlank(message = "コースIDは必須です")
     private String courseId;
 
