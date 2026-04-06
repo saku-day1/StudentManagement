@@ -4,7 +4,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-
+/**
+ * 受講生更新時のリクエスト情報を保持するDTOです。
+ * 必須項目やメール形式などの入力チェックを行います。
+ */
 @Getter
 @Setter
 public class UpdateStudentRequest {

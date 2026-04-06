@@ -76,11 +76,12 @@ public class StudentService {
 
         return studentDetail;
     }
+
     /**
      * 受講生コース情報を登録する際の初期情報を設定する。
      *
-     * @param studentCourse　受講生コース情報
-     * @param student 受講生
+     * @param studentCourse 受講生コース情報
+     * @param student       受講生
      */
     private static void initStudentsCourse(StudentCourse studentCourse, Student student) {
         LocalDateTime now = LocalDateTime.now();
@@ -93,7 +94,8 @@ public class StudentService {
     /**
      * 受講生情報の更新を行います。
      * 受講生の情報と受講生コース情報をそれぞれ更新します。
-     * @param studentDetail　受講生詳細
+     *
+     * @param studentDetail 受講生詳細
      */
     @Transactional
     public StudentDetail updateStudent(StudentDetail studentDetail) {
@@ -107,10 +109,12 @@ public class StudentService {
         return studentDetail;
 
     }
-    public void deleteStudent(String id){
+
+    public void deleteStudent(String id) {
         repository.deleteStudent(id);
     }
-    public void restoreStudent(String id){
+
+    public void restoreStudent(String id) {
         repository.restoreStudent(id);
     }
 
