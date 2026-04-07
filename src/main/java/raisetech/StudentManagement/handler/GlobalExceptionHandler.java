@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import raisetech.StudentManagement.dto.ErrorMessage;
+import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 
 
@@ -16,5 +17,13 @@ public class GlobalExceptionHandler {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setMessage(e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ErrorMessage> handleDuplicateEmail(DuplicateEmailException e) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 }

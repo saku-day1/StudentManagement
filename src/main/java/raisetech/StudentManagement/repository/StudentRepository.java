@@ -82,6 +82,14 @@ public interface StudentRepository {
      * @param id 受講生ID
      */
     void restoreStudent(String id);
+
+    /**
+     * 指定したメールアドレスが既に登録されているかを確認します。
+     *
+     * @param email 受講生メールアドレス
+     * @return 存在する場合はtrue、存在しない場合はfalse
+     */
+    boolean existsByEmail(String email);
 }
 
 

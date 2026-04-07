@@ -61,5 +61,10 @@
         SET is_deleted = false WHERE id = #{id} AND is_deleted = true
     </update>
 
+    <!--メールアドレスの重複確認　-->
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) FROM students WHERE email = #{email}
+    </select>
+
 
 </mapper>
