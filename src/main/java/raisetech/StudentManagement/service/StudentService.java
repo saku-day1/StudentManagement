@@ -9,6 +9,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 
 import raisetech.StudentManagement.dto.UpdateStudentRequest;
+import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -72,6 +73,10 @@ public class StudentService {
     public StudentDetail registerStudent(StudentDetail studentDetail) {
         //準備
         Student student = studentDetail.getStudent();
+
+        if(repository.existsByEmail(student.getEmail())){
+            throw new DuplicateEmailException(student.getEmail() + " はすでに使われているメールアドレスです");
+        }
         repository.registerStudent(student);
 
         studentDetail.getStudentCourseList().forEach(studentCourse -> {
