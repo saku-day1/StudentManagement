@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.ResultMessage;
@@ -15,7 +14,7 @@ import java.util.List;
 /**
  * 受講生情報の登録、検索、更新をREST　APIとして受け付けるControllerです
  */
-@Validated
+
 @RestController
 @RequestMapping("/api/students")
 public class StudentRestController {
@@ -43,7 +42,8 @@ public class StudentRestController {
      * @return 受講生
      */
     @GetMapping("/{id}")
-    public StudentDetail getStudent(@PathVariable  @NotBlank @Pattern(regexp = "^\\d+$") String id) {
+    public StudentDetail getStudent(@PathVariable  @NotBlank @Pattern
+            (regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         return service.searchStudent(id);
     }
 
