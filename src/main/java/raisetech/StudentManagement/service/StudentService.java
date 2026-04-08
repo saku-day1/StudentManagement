@@ -10,7 +10,6 @@ import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class StudentService {
     public void registerStudent(StudentDetail studentDetail) {
         Student student = studentDetail.getStudent();
 
-        if(repository.existsByEmail(student.getEmail())){
+        if(repository.countByEmail(student.getEmail()) > 0){
             throw new DuplicateEmailException(student.getEmail() + " はすでに使われているメールアドレスです");
         }
         repository.registerStudent(student);

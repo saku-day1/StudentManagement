@@ -48,21 +48,20 @@
     </update>
 
     <!--受講生情報を論理削除　-->
-    <update id="deleteStudent"
-            parameterType="raisetech.StudentManagement.data.Student">
-        UPDATE students
-        SET is_deleted = true WHERE id = #{id} AND is_deleted = false
+    <update id="deleteStudent" parameterType="string">
+        UPDATE students SET is_deleted = true
+        WHERE id = #{id} AND is_deleted = false
     </update>
 
+
     <!--受講生情報を復元　-->
-    <update id="restoreStudent"
-            parameterType="raisetech.StudentManagement.data.Student">
-        UPDATE students
-        SET is_deleted = false WHERE id = #{id} AND is_deleted = true
+    <update id="restoreStudent" parameterType="string">
+        UPDATE students SET is_deleted = false
+        WHERE id = #{id} AND is_deleted = true
     </update>
 
     <!--メールアドレスの重複確認　-->
-    <select id="existsByEmail" resultType="boolean">
+    <select id="countByEmail" resultType="int">
         SELECT COUNT(*) FROM students WHERE email = #{email}
     </select>
 
