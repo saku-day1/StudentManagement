@@ -127,7 +127,7 @@ public interface StudentRepository {
      * @param email 受講生メールアドレス
      * @return 存在する場合はtrue、存在しない場合はfalse
      */
-    boolean existsByEmail(String email);
+    int countByEmail(String email);
 }
 
 
