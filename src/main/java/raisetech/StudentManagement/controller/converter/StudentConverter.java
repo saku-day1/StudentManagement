@@ -1,4 +1,5 @@
 package raisetech.StudentManagement.controller.converter;
+
 import org.springframework.stereotype.Component;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
@@ -25,7 +26,6 @@ public class StudentConverter {
                     .collect(Collectors.toList());
 
             studentDetail.setStudentCourseList(converterStudentCourses);
-
             studentDetails.add(studentDetail);
         });
 

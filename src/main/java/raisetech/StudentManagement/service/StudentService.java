@@ -7,6 +7,11 @@ import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
+<<<<<<< HEAD
+=======
+
+import raisetech.StudentManagement.dto.UpdateStudentRequest;
+>>>>>>> main
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;

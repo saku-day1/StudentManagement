@@ -32,13 +32,19 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 	implementation 'org.apache.commons:commons-lang3:3.19.0'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 
+<<<<<<< HEAD
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
+=======
+>>>>>>> main
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
