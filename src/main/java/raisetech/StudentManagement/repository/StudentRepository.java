@@ -120,6 +120,14 @@ public interface StudentRepository {
     WHERE id = #{id} AND is_deleted = true
 """)
     void restoreStudent(String id);
+
+    /**
+     * 指定したメールアドレスが既に登録されているかを確認します。
+     *
+     * @param email 受講生メールアドレス
+     * @return 存在する場合はtrue、存在しない場合はfalse
+     */
+    int countByEmail(String email);
 }
 
 
