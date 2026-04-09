@@ -7,8 +7,11 @@ import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
+<<<<<<< HEAD
+=======
 
 import raisetech.StudentManagement.dto.UpdateStudentRequest;
+>>>>>>> main
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -65,12 +68,9 @@ public class StudentService {
      * 受講生と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づける値やコース開始日、コース終了日を設定します。
      *
      * @param studentDetail 受講生詳細
-     * @return 登録情報を付与した受講生詳細
-     *
      */
     @Transactional
-    public StudentDetail registerStudent(StudentDetail studentDetail) {
-        //準備
+    public void registerStudent(StudentDetail studentDetail) {
         Student student = studentDetail.getStudent();
 
         if(repository.countByEmail(student.getEmail()) > 0){
@@ -82,14 +82,13 @@ public class StudentService {
             initStudentsCourse(studentCourse, student);
             repository.registerStudentCourse(studentCourse);
         });
-
-        return studentDetail;
     }
+
     /**
      * 受講生コース情報を登録する際の初期情報を設定する。
      *
-     * @param studentCourse　受講生コース情報
-     * @param student 受講生
+     * @param studentCourse 受講生コース情報
+     * @param student       受講生
      */
     private static void initStudentsCourse(StudentCourse studentCourse, Student student) {
         LocalDateTime now = LocalDateTime.now();
@@ -102,47 +101,25 @@ public class StudentService {
     /**
      * 受講生情報の更新を行います。
      * 受講生の情報と受講生コース情報をそれぞれ更新します。
-     * @param studentDetail　受講生詳細
+     *
+     * @param studentDetail 受講生詳細
      */
     @Transactional
-    public StudentDetail updateStudent(StudentDetail studentDetail) {
+    public void updateStudent(StudentDetail studentDetail) {
         repository.updateStudent(studentDetail.getStudent());
 
         studentDetail.getStudentCourseList().forEach(studentCourse -> {
             studentCourse.setStudentId(studentDetail.getStudent().getId());
             repository.updateStudentCourse(studentCourse);
         });
-
-        return studentDetail;
-
     }
-    public void deleteStudent(String id){
+
+    public void deleteStudent(String id) {
         repository.deleteStudent(id);
     }
-    public void restoreStudent(String id){
+
+    public void restoreStudent(String id) {
         repository.restoreStudent(id);
-    }
-
-    @Transactional
-    public void updateStudent(UpdateStudentRequest request) {
-        Student student = new Student();
-        student.setId(request.getId());
-        student.setName(request.getName());
-        student.setFurigana(request.getFurigana());
-        student.setNickname(request.getNickname());
-        student.setEmail(request.getEmail());
-        student.setArea(request.getArea());
-        student.setAge(request.getAge());
-        student.setGender(request.getGender());
-        student.setRemarks(request.getRemarks());
-        student.setDeleted(request.isDeleted());
-        repository.updateStudent(student);
-
-        StudentCourse course = new StudentCourse();
-        course.setId(request.getCourseId());
-        course.setStudentId(request.getId());
-        course.setCourseName(request.getCourseName());
-        repository.updateStudentCourse(course);
     }
 
 }

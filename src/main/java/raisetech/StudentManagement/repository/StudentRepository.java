@@ -14,28 +14,22 @@ import java.util.List;
 @Mapper
 public interface StudentRepository {
     /**
-     * 受講生の全件を行います。
-     *
+     * 受講生の全件検索を行います。
      * @return 受講生情報(論理削除されたものを除く)
-     *
      */
-    @Select("SELECT * FROM students WHERE is_deleted = false")
     List<Student> search();
+
     /**
-     *
      * 受講生の検索を行います。
      * @param id　受講生ID
      * @return 受講生
      */
-
-    @Select("SELECT * FROM students WHERE id = #{id} AND is_deleted = false")
     Student searchStudent(String id);
 
     /**
      * 受講生のコース情報の全件検索を行います。
      * @return 全件検索したコース情報の一覧。
      */
-    @Select("SELECT * FROM student_courses")
     List<StudentCourse> searchStudentCourseList();
 
     /**
@@ -43,8 +37,6 @@ public interface StudentRepository {
      * @param studentId 受講生ID
      * @return 受講生IDに紐づく受講生コース情報。
      */
-
-    @Select("SELECT * FROM student_courses WHERE student_id = #{studentId}")
     List<StudentCourse> searchStudentCourse(String studentId);
 
     /**
@@ -63,39 +55,19 @@ public interface StudentRepository {
      * IDに関しては自動採番を行う。
      * @param studentCourse 受講生コース情報
      */
-    @Insert("INSERT INTO student_courses(student_id,course_name,course_start_at,course_end_at)" +
-            "values(#{studentId},#{courseName},#{courseStartAt},#{courseEndAt})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
+
     void registerStudentCourse(StudentCourse studentCourse);
 
     /**
      * 受講生を更新します。
      * @param student　受講生
      */
-    @Update("""
-                UPDATE students
-                SET name = #{name},
-                    furigana = #{furigana},
-                    nickname = #{nickname},
-                    email = #{email},
-                    area = #{area},
-                    age = #{age},
-                    gender = #{gender},
-                    remarks = #{remarks},
-                    is_deleted = #{deleted}
-                WHERE id = #{id}
-            """)
     void updateStudent(Student student);
 
     /**
      * 受講生コース情報のコース名を更新します。
      * @param studentCourse　受講生コース
      */
-    @Update("""
-                UPDATE student_courses
-                SET course_name = #{courseName}
-                WHERE id = #{id}
-            """)
     void updateStudentCourse(StudentCourse studentCourse);
 
     /**
@@ -103,22 +75,12 @@ public interface StudentRepository {
      * すでに削除されている場合は選択できません。
      * @param id 受講生ID
      */
-    @Update("""
-    UPDATE students
-    SET is_deleted = true
-    WHERE id = #{id} AND is_deleted = false
-    """)
     void deleteStudent(String id);
 
     /**
      * 削除された受講生の復元を行います。
      * @param id 受講生ID
      */
-    @Update("""
-    UPDATE students
-    SET is_deleted = false
-    WHERE id = #{id} AND is_deleted = true
-""")
     void restoreStudent(String id);
 
     /**
