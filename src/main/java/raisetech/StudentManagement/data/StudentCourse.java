@@ -23,14 +23,16 @@ import java.time.LocalDateTime;
 @Setter
 
 public class StudentCourse {
+
+    @Pattern(regexp = "^\\d+$")
     private String id;
+
+    @Pattern(regexp = "^\\d+$")
     private String studentId;
 
     @NotBlank(message = "コース名は必須です")
-    @Pattern(
-            regexp = "^(Javaコース|AWSコース|Webデザインコース)$",
-            message = "コース名は指定されたものを入力してください"
-    )
+    @Pattern(regexp = "^(Javaコース|AWSコース|Webデザインコース)$",
+            message = "コース名は指定された値から入力してください")
     private String courseName;
 
     private LocalDateTime courseStartAt;

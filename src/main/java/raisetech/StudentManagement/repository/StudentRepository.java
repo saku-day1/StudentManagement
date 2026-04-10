@@ -14,14 +14,12 @@ import java.util.List;
 @Mapper
 public interface StudentRepository {
     /**
-     * 受講生の全件を行います。
-     *
+     * 受講生の全件検索を行います。
      * @return 受講生情報(論理削除されたものを除く)
-     *
      */
     List<Student> search();
+
     /**
-     *
      * 受講生の検索を行います。
      * @param id　受講生ID
      * @return 受講生

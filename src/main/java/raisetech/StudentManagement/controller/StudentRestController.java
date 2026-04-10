@@ -43,13 +43,11 @@ public class StudentRestController {
      * @return 受講生
      */
     @GetMapping("/{id}")
-    public StudentDetail getStudent(
-            @PathVariable
-            @NotBlank(message = "IDは必須です")
-            @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
-            String id) {
+    public StudentDetail getStudent(@PathVariable  @NotBlank @Pattern
+            (regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         return service.searchStudent(id);
     }
+
 
     /**
      * 受講生詳細登録処理です。
