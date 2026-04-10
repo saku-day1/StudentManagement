@@ -44,10 +44,6 @@ public interface StudentRepository {
      * IDに関しては自動採番を行う。
      * @param student 受講生
      */
-
-    @Insert("INSERT INTO students(name,furigana,nickname,email,area,age,gender,remarks,is_deleted) VALUES" +
-            "(#{name},#{furigana},#{nickname},#{email},#{area},#{age},#{gender},#{remarks}, false)")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
     void registerStudent(Student student);
 
     /**
@@ -55,7 +51,6 @@ public interface StudentRepository {
      * IDに関しては自動採番を行う。
      * @param studentCourse 受講生コース情報
      */
-
     void registerStudentCourse(StudentCourse studentCourse);
 
     /**
@@ -87,7 +82,7 @@ public interface StudentRepository {
      * 指定したメールアドレスが既に登録されているかを確認します。
      *
      * @param email 受講生メールアドレス
-     * @return 存在する場合はtrue、存在しない場合はfalse
+     * @return 該当するメールアドレスの件数
      */
     int countByEmail(String email);
 }
