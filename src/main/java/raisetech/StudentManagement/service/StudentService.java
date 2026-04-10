@@ -7,11 +7,8 @@ import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
-<<<<<<< HEAD
-=======
 
 import raisetech.StudentManagement.dto.UpdateStudentRequest;
->>>>>>> main
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -120,6 +117,28 @@ public class StudentService {
 
     public void restoreStudent(String id) {
         repository.restoreStudent(id);
+    }
+
+    @Transactional
+    public void updateDetailStudent(UpdateStudentRequest request) {
+        Student student = new Student();
+        student.setId(request.getId());
+        student.setName(request.getName());
+        student.setFurigana(request.getFurigana());
+        student.setNickname(request.getNickname());
+        student.setEmail(request.getEmail());
+        student.setArea(request.getArea());
+        student.setAge(request.getAge());
+        student.setGender(request.getGender());
+        student.setRemarks(request.getRemarks());
+        student.setDeleted(request.isDeleted());
+        repository.updateStudent(student);
+
+        StudentCourse course = new StudentCourse();
+        course.setId(request.getCourseId());
+        course.setStudentId(request.getId());
+        course.setCourseName(request.getCourseName());
+        repository.updateStudentCourse(course);
     }
 
 }

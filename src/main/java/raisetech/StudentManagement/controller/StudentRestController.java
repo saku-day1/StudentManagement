@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * 受講生情報の登録、検索、更新をREST APIとして受け付けるControllerです
  */
+
 @RestController
 @RequestMapping("/api/students")
 public class StudentRestController {
@@ -42,16 +43,8 @@ public class StudentRestController {
      * @return 受講生
      */
     @GetMapping("/{id}")
-<<<<<<< HEAD
     public StudentDetail getStudent(@PathVariable  @NotBlank @Pattern
             (regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
-=======
-    public StudentDetail getStudent(
-            @PathVariable
-            @NotBlank(message = "IDは必須です")
-            @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
-            String id) {
->>>>>>> main
         return service.searchStudent(id);
     }
 
