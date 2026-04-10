@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UpdateStudentDetailRequest {
+public class UpdateStudentRequest {
 
     @NotBlank(message = "IDは必須です")
     private String id;

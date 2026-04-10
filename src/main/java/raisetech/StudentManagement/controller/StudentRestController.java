@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * 受講生情報の登録、検索、更新をREST APIとして受け付けるControllerです
  */
+
 @RestController
 @RequestMapping("/api/students")
 public class StudentRestController {

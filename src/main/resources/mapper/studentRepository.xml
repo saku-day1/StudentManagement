@@ -23,6 +23,13 @@
     </select>
 
     <!--受講生情報とコース情報を新規登録　-->
+    <insert id="registerStudent"
+            parameterType="raisetech.StudentManagement.data.Student"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO students ( name, furigana, nickname, email, area, age, gender, remarks, is_deleted )
+        VALUES ( #{name}, #{furigana}, #{nickname}, #{email}, #{area}, #{age}, #{gender}, #{remarks}, #{deleted} )
+    </insert>
     <insert id="registerStudentCourse"
             parameterType="raisetech.StudentManagement.data.StudentCourse"
             useGeneratedKeys="true"

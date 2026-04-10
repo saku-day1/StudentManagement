@@ -1,6 +1,8 @@
 package raisetech.StudentManagement.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,8 +25,16 @@ import java.time.LocalDateTime;
 public class StudentCourse {
     private String id;
     private String studentId;
+
+    @NotBlank(message = "コース名は必須です")
+    @Pattern(
+            regexp = "^(Javaコース|AWSコース|Webデザインコース)$",
+            message = "コース名は指定されたものを入力してください"
+    )
     private String courseName;
+
     private LocalDateTime courseStartAt;
+
     private LocalDateTime courseEndAt;
 }
 

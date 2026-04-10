@@ -124,7 +124,7 @@ public class StudentService {
     }
 
     @Transactional
-    public void updateStudent(UpdateStudentRequest request) {
+    public void updateDetailStudent(UpdateStudentRequest request) {
         Student student = new Student();
         student.setId(request.getId());
         student.setName(request.getName());
