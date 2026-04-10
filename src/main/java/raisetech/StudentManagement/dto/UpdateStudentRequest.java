@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+
+
 @Getter
 @Setter
-public class UpdateStudentRequest {
+public class UpdateStudentDetailRequest {
 
     @NotBlank(message = "IDは必須です")
     private String id;
