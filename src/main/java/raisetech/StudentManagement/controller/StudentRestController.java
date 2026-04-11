@@ -74,9 +74,8 @@ public class StudentRestController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<String> updateStudent(
-            @PathVariable String id,
+            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id,
             @Valid @RequestBody StudentDetail studentDetail) {
-
         studentDetail.getStudent().setId(id);
         service.updateStudent(studentDetail);
         return ResponseEntity.ok("受講生情報を更新しました");
@@ -89,7 +88,8 @@ public class StudentRestController {
      * @return 実行結果
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteStudent(@PathVariable String id) {
+    public ResponseEntity<String> deleteStudent(
+            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.deleteStudent(id);
         return ResponseEntity.ok("受講生を論理削除しました");
     }
@@ -101,8 +101,11 @@ public class StudentRestController {
      * @return 実行結果
      */
     @PutMapping("/{id}/restore")
-    public ResponseEntity<String> restoreStudent(@PathVariable String id) {
+    public ResponseEntity<String> restoreStudent(
+            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.restoreStudent(id);
         return ResponseEntity.ok("受講生情報を復元しました");
     }
+
+
 }

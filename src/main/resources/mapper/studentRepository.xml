@@ -4,12 +4,13 @@
 
     <!--受講生の全件検索　-->
     <select id="search" resultType="raisetech.StudentManagement.data.Student">
-        SELECT * FROM students WHERE is_deleted = false
+        SELECT id, name, furigana, nickname, email, area, age, gender, remarks, is_deleted AS deleted
+        FROM students WHERE is_deleted = false
     </select>
 
-    <!--受講生の検索　-->
     <select id="searchStudent" resultType="raisetech.StudentManagement.data.Student">
-        SELECT * FROM students WHERE id = #{id} AND is_deleted = false
+        SELECT id, name, furigana, nickname, email, area, age, gender, remarks, is_deleted AS deleted
+        FROM students WHERE id = #{id}
     </select>
 
     <!--コース情報の検索　-->
