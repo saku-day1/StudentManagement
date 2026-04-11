@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.handler;
 
+import jakarta.annotation.Nonnull;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import raisetech.StudentManagement.dto.ErrorMessage;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
+import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 
 import java.util.stream.Collectors;
@@ -102,5 +105,37 @@ public class GlobalExceptionHandler {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setMessage(message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    }
+
+    /**
+     * すでに論理削除済みの受講生を削除しようとした場合の例外を処理し、409 Conflict のエラーレスポンスを返却します。
+     *
+     * @param e すでに論理削除済みの受講生に対する削除操作時の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(StudentAlreadyDeletedException.class)
+    public ResponseEntity<ErrorMessage> handleStudentAlreadyDeletedException(StudentAlreadyDeletedException e) {
+        ErrorMessage errorMessage = getErrorMessage(e);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+    }
+
+    /**
+     * すでに有効状態の受講生を復元しようとした場合の例外を処理し、
+     * 409 Conflict のエラーレスポンスを返却します。
+     *
+     * @param e すでに有効状態の受講生に対する復元操作時の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(StudentAlreadyActiveException.class)
+    public ResponseEntity<ErrorMessage> handleStudentAlreadyActiveException(StudentAlreadyActiveException e) {
+        ErrorMessage errorMessage = getErrorMessage(e);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+    }
+
+    @Nonnull
+    private static ErrorMessage getErrorMessage(RuntimeException e) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setMessage(e.getMessage());
+        return errorMessage;
     }
 }

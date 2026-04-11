@@ -8,6 +8,8 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
+import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -117,8 +119,18 @@ public class StudentService {
      * 指定した受講生IDの論理削除を行います
      *
      * @param id 受講生ID
+     * @throws StudentNotFoundException 指定したIDの受講生が存在しない場合
+     * @throws StudentAlreadyDeletedException 指定したIDの受講生が論理削除されている場合
      */
     public void deleteStudent(String id) {
+        Student student = repository.searchStudent(id);
+
+        if (student == null) {
+            throw new StudentNotFoundException(id);
+        }
+        if (student.isDeleted()) {
+            throw new StudentAlreadyDeletedException(id);
+        }
         repository.deleteStudent(id);
     }
 
@@ -126,8 +138,17 @@ public class StudentService {
      * 指定した受講生IDの復元処理を行います
      *
      * @param id 受講生ID
+     * @throws StudentNotFoundException 指定したIDの受講生が存在しない場合
+     * @throws StudentAlreadyActiveException 指定したIDの受講生が有効状態の場合
      */
     public void restoreStudent(String id) {
+        Student student = repository.searchStudent(id);
+        if (student == null){
+            throw new StudentNotFoundException(id);
+        }
+        if (!student.isDeleted()){
+            throw new StudentAlreadyActiveException(id);
+        }
         repository.restoreStudent(id);
     }
 }
