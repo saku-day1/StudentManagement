@@ -10,12 +10,12 @@ import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 受講生情報を取り扱うサービスです。
- * 受講生の検索や登録、更新処理を行います。
+ * 受講生情報の検索、登録、更新、削除、復元を行うサービスクラスです。
  */
 @Service
 public class StudentService {
@@ -42,15 +42,16 @@ public class StudentService {
     }
 
     /**
-     * 受講生詳細検索です。
-     * IDに紐づく受講生詳細情報を取得した後、その受講生情報に紐づく受講生コース情報を取得して設定します。
+     * 指定したIDに紐づく受講生詳細を取得します。
+     * 受講生情報を取得した後、その受講生に紐づく受講生コース情報を設定します。
      *
      * @param id 受講生ID
      * @return 受講生詳細
+     * @throws StudentNotFoundException 指定したIDの受講生が存在しない場合
      */
     public StudentDetail searchStudent(String id) {
         Student student = repository.searchStudent(id);
-        if(student == null){
+        if (student == null) {
             throw new StudentNotFoundException("ID:" + id + " の受講生情報が見つかりませんでした");
         }
         List<StudentCourse> studentCourse = repository.searchStudentCourse(student.getId());
@@ -60,15 +61,17 @@ public class StudentService {
 
     /**
      * 受講生詳細の登録を行います。
-     * 受講生と受講生コース情報を個別に登録し、受講生コース情報には受講生情報を紐づける値やコース開始日、コース終了日を設定します。
+     * 受講生情報と受講生コース情報をそれぞれ登録し、
+     * 受講生コース情報には受講生情報に紐づく値やコース開始日、コース終了日を設定します。
      *
      * @param studentDetail 受講生詳細
+     * @throws DuplicateEmailException メールアドレスが既に登録されている場合
      */
     @Transactional
     public void registerStudent(StudentDetail studentDetail) {
         Student student = studentDetail.getStudent();
 
-        if(repository.countByEmail(student.getEmail()) > 0){
+        if (repository.countByEmail(student.getEmail()) > 0) {
             throw new DuplicateEmailException(student.getEmail() + " はすでに使われているメールアドレスです");
         }
         repository.registerStudent(student);
@@ -80,7 +83,8 @@ public class StudentService {
     }
 
     /**
-     * 受講生コース情報を登録する際の初期情報を設定する。
+     * 受講生コース情報の初期情報を設定します
+     * 受講生ID、コース開始日、コース終了日を設定します
      *
      * @param studentCourse 受講生コース情報
      * @param student       受講生
@@ -109,14 +113,23 @@ public class StudentService {
         });
     }
 
+    /**
+     * 指定した受講生IDの論理削除を行います
+     *
+     * @param id 受講生ID
+     */
     public void deleteStudent(String id) {
         repository.deleteStudent(id);
     }
 
+    /**
+     * 指定した受講生IDの復元処理を行います
+     *
+     * @param id 受講生ID
+     */
     public void restoreStudent(String id) {
         repository.restoreStudent(id);
     }
-
 }
 
 

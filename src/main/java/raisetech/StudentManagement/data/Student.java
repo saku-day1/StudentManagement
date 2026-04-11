@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 受講生情報を扱うオブジェクト
+ * 受講生情報を保持するデータクラスです。
  */
 @Getter
 @Setter
@@ -39,6 +39,8 @@ public class Student {
     private String gender;
 
     private String remarks;
-
+    /**
+     * 論理削除されているかどうかを表すフラグです。
+     */
     private boolean deleted;
 }

@@ -11,7 +11,7 @@ import raisetech.StudentManagement.data.StudentCourse;
 import java.util.List;
 
 /**
- * 生徒情報とコース情報をもつオブジェクト
+ * 受講生情報とコース情報を保持するデータクラス
  */
 @Getter
 @Setter
