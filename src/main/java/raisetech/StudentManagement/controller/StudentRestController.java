@@ -49,8 +49,6 @@ public class StudentRestController {
             String id) {
         return service.searchStudent(id);
     }
-
-
         /**
          * 受講生詳細登録処理です。
          *
