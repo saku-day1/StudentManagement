@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * 受講生コース情報を扱うオブジェクト
+ * 受講生コース情報を保持するデータクラスです
  */
 @JsonPropertyOrder({
         "id",

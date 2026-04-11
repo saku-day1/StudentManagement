@@ -5,12 +5,11 @@ import lombok.Setter;
 
 
 /**
- * APIの実行結果として追加でメッセージを返却するためのDTOです。
+ * APIの実行結果としてメッセージと受講生IDを返却するためのDTOです。
  */
-
 @Getter
 @Setter
 public class ResultMessage {
-    String message;
-    String studentId;
+    private String message;
+    private String studentId;
 }
