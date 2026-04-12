@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 重複したメールアドレスが指定された場合の例外を処理し、
-     * 400 Bad Request のエラーレスポンスを返却します。
+     * 409 Conflict のエラーレスポンスを返却します。
      *
      * @param e メールアドレス重複時の例外
      * @return エラーメッセージを含むレスポンス
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleDuplicateEmail(DuplicateEmailException e) {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setMessage(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
     }
 
     /**
