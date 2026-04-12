@@ -22,20 +22,31 @@ repositories {
     mavenCentral()
 }
 dependencies {
+    //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    //Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    //Thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    //Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    //便利機能、ユーティリティ
+
+
+    //Open API Generator
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+
     implementation 'org.apache.commons:commons-lang3:3.19.0'
+    //Mybatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-
+    //MySQL
     runtimeOnly 'com.mysql:mysql-connector-j'
-
+    //tomcat
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    //Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

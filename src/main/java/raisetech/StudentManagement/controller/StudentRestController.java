@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,9 @@ public class StudentRestController {
      *
      * @return 受講生詳細一覧
      */
+    @Operation(summary = "一覧検索",description = "受講生の一覧を取得します")
     @GetMapping
-    public List<StudentDetail> getStudentsList() {
+    public List<StudentDetail> getStudentList() {
         return service.searchStudentList();
     }
 
@@ -40,11 +42,13 @@ public class StudentRestController {
      * @param id 受講生ID
      * @return 受講生詳細
      */
+    @Operation(summary = "詳細検索",description = "受講生の一覧の詳細を取得します")
     @GetMapping("/{id}")
     public StudentDetail getStudent(
             @PathVariable
             @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
             String id) {
+
         return service.searchStudent(id);
     }
 
@@ -55,6 +59,7 @@ public class StudentRestController {
      * @param studentDetail 登録対象の受講生詳細情報
      * @return 処理成功メッセージと受講生ID
      */
+    @Operation(summary = "受講生登録",description = "受講生を登録します")
     @PostMapping
     public ResponseEntity<ResultMessage> registerStudent(
             @Valid @RequestBody StudentDetail studentDetail) {
@@ -72,6 +77,7 @@ public class StudentRestController {
      * @param studentDetail 更新対象の受講生詳細情報
      * @return 実行結果
      */
+    @Operation(summary = "受講生更新",description = "受講生の更新を行います")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id,
@@ -87,6 +93,7 @@ public class StudentRestController {
      * @param id 受講生ID
      * @return 実行結果
      */
+    @Operation(summary = "受講生を論理削除する", description = "指定したIDの受講生を論理削除し、一覧表示の対象外にします。")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
@@ -100,6 +107,7 @@ public class StudentRestController {
      * @param id 受講生ID
      * @return 実行結果
      */
+    @Operation(summary = "受講生を復元する", description = "指定したIDの受講生を復元し、一覧表示の対象にします。")
     @PutMapping("/{id}/restore")
     public ResponseEntity<String> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
