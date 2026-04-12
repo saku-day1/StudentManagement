@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 /**
  * 受講生情報を保持するデータクラスです。
  */
+@Schema(description = "受講生")
 @Getter
 @Setter
 public class Student {
@@ -26,7 +28,8 @@ public class Student {
     @Email
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "住所は必須です")
+
     private String area;
 
     @Min(value = 0, message = "年齢は0以上で入力してください")

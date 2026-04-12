@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
         "courseStartAt",
         "courseEndAt"
 })
-
+@Schema(description = "受講生コース情報")
 @Getter
 @Setter
 
