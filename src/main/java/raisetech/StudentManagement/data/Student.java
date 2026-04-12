@@ -26,7 +26,6 @@ public class Student {
     @Email
     private String email;
 
-    @NotBlank
     private String area;
 
     @Min(value = 0, message = "年齢は0以上で入力してください")
