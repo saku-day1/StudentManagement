@@ -28,6 +28,8 @@ public class Student {
     @Email
     private String email;
 
+    @NotBlank(message = "住所は必須です")
+
     private String area;
 
     @Min(value = 0, message = "年齢は0以上で入力してください")

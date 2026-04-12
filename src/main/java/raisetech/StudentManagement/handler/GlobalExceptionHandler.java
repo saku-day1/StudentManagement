@@ -1,6 +1,8 @@
 package raisetech.StudentManagement.handler;
 
 import jakarta.annotation.Nonnull;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +35,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(StudentNotFoundException.class)
     public ResponseEntity<ErrorMessage> handleStudentException(StudentNotFoundException e) {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorMessage(e.getMessage()));
 
     }
 
@@ -48,9 +48,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ErrorMessage> handleDuplicateEmail(DuplicateEmailException e) {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorMessage(e.getMessage()));
     }
 
     /**
@@ -70,9 +68,29 @@ public class GlobalExceptionHandler {
                     return field + ": " + error.getDefaultMessage();
                 })
                 .collect(Collectors.joining(", "));
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage(message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage(message));
+    }
+
+    /**
+     * メソッド引数のバリデーションエラーを処理し、
+     * 400 Bad Request のエラーレスポンスを返却します。
+     *
+     * @param e バリデーションエラー
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorMessage> handleConstraintViolationException(
+            ConstraintViolationException e) {
+
+        String message = e.getConstraintViolations().stream()
+                .findFirst()
+                .map(ConstraintViolation::getMessage)
+                .orElse("入力値が不正です。");
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorMessage(message));
     }
 
     /**
@@ -86,6 +104,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setMessage("入力値の型が正しくありません");
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 
@@ -102,13 +121,13 @@ public class GlobalExceptionHandler {
         String message = e.getAllErrors().stream()
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage(message);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage(message));
     }
 
     /**
-     * すでに論理削除済みの受講生を削除しようとした場合の例外を処理し、409 Conflict のエラーレスポンスを返却します。
+     * すでに論理削除済みの受講生を削除しようとした場合の例外を処理し、
+     * 409 Conflict のエラーレスポンスを返却します。
      *
      * @param e すでに論理削除済みの受講生に対する削除操作時の例外
      * @return エラーメッセージを含むレスポンス
@@ -139,3 +158,5 @@ public class GlobalExceptionHandler {
         return errorMessage;
     }
 }
+
+

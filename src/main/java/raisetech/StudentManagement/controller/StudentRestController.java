@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.ErrorMessage;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
+@Validated
 public class StudentRestController {
 
     private final StudentService service;
@@ -141,13 +143,7 @@ public class StudentRestController {
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ一例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です,
-                                               student.furigana: フリガナは必須です,
-                                               student.furigana: フリガナはカタカナで入力してください,
-                                               student.email: メールアドレスは必須です,
-                                               student.gender: 性別は指定された値を入力してください,
-                                               courseName: コース名は必須です,
-                                               courseName: コース名は指定された値から入力してください"
+                                              "message": "student.name: 名前は必須です
                                             }
                                             """)
                     )
@@ -201,13 +197,7 @@ public class StudentRestController {
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です,
-                                               student.furigana: フリガナは必須です,
-                                               student.furigana: フリガナはカタカナで入力してください,
-                                               student.email: メールアドレスは必須です,
-                                               student.gender: 性別は指定された値を入力してください,
-                                               courseName: コース名は必須です,
-                                               courseName: コース名は指定された値から入力してください"
+                                              "message": "student.name: 名前は必須です
                                             }
                                             """)
                     )
