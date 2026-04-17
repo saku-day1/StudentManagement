@@ -396,9 +396,8 @@ class StudentServiceTest {
         when(repository.searchStudent("1")).thenReturn(student);
 
         assertThrows(StudentAlreadyActiveException.class , () -> sut.restoreStudent("1"));
-        verify(repository,times(1)).searchStudent("1");
         verify(repository, never()).restoreStudent("1");
-
+        verify(repository).searchStudent("1");
     }
 }
 
