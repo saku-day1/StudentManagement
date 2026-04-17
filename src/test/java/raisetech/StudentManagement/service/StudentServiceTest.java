@@ -365,8 +365,19 @@ class StudentServiceTest {
         assertThrows(StudentAlreadyDeletedException.class , () -> sut.deleteStudent("1"));
         verify(repository,never()).deleteStudent("1");
         verify(repository).searchStudent("1");
+    }
+    @Test
+    void 受講生復元_受講生の復元処理が適切に行われること(){
+        Student student = new Student();
+        student.setId("1");
+        student.setDeleted(true);
 
+        when(repository.searchStudent("1")).thenReturn(student);
 
+        sut.restoreStudent("1");
+
+        verify(repository,times(1)).searchStudent("1");
+        verify(repository.ti)
     }
 }
 
