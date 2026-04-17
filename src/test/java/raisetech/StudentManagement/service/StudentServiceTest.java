@@ -11,6 +11,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
@@ -93,7 +94,7 @@ class StudentServiceTest {
         //一連の流れが1回処理されているかどうかの確認
         verify(repository, times(1)).searchStudent(id);
         verify(repository, times(1)).searchStudentCourse(student.getId());
-        
+
     }
 
     @Test
@@ -268,7 +269,7 @@ class StudentServiceTest {
         ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
         //resisterStudentCourseが2回呼ばれたことを確認　
         //引数をすべてcaptorにつめる
-        verify(repository,times(2)).registerStudentCourse(captor.capture());
+        verify(repository, times(2)).registerStudentCourse(captor.capture());
         //捕まえた2件をまとめて取り出す
         List<StudentCourse> capturedCourses = captor.getAllValues();
 
@@ -287,7 +288,7 @@ class StudentServiceTest {
     }
 
     @Test
-    void 受講生更新_受講生更新時に受講生情報とコース情報が適切に更新されること(){
+    void 受講生更新_受講生更新時に受講生情報とコース情報が適切に更新されること() {
         Student student = new Student();
         student.setId("1");
         StudentCourse course = new StudentCourse();
@@ -303,18 +304,17 @@ class StudentServiceTest {
         sut.updateStudent(studentDetail);
 
         ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
-        verify(repository,times(1)).updateStudent(student);
-        verify(repository,times(1)).updateStudentCourse(captor.capture());
+        verify(repository, times(1)).updateStudent(student);
+        verify(repository, times(1)).updateStudentCourse(captor.capture());
 
         StudentCourse capturedCourse = captor.getValue();
 
         assertEquals("1", capturedCourse.getStudentId());
     }
 
-   
 
     @Test
-    void 受講生更新_更新対象の受講生が存在しない場合の例外処理が適切に行われること(){
+    void 受講生更新_更新対象の受講生が存在しない場合の例外処理が適切に行われること() {
         Student student = new Student();
         student.setId("1");
         StudentDetail studentDetail = new StudentDetail();
@@ -325,12 +325,48 @@ class StudentServiceTest {
 
         assertThrows(StudentNotFoundException.class, () -> sut.updateStudent(studentDetail));
 
-        verify(repository,times(1)).searchStudent(studentDetail.getStudent().getId());
-        verify(repository,never()).updateStudent(student);
-        verify(repository,never()).updateStudentCourse(any(StudentCourse.class));
+        verify(repository, times(1)).searchStudent(studentDetail.getStudent().getId());
+        verify(repository, never()).updateStudent(student);
+        verify(repository, never()).updateStudentCourse(any(StudentCourse.class));
 
 
     }
+    @Test
+    void 受講生論理削除_論理削除対象の受講生が存在する場合の論理削除が適切に行われること(){
+        Student student = new Student();
+        student.setId("1");
+        student.setDeleted(false);
 
+        when(repository.searchStudent("1")).thenReturn(student);
+
+        sut.deleteStudent("1");
+
+        verify(repository, times(1)).searchStudent("1");
+        verify(repository, times(1)).deleteStudent("1");
+
+    }
+    @Test
+    void 受講生論理削除_論理削除対象の受講生が存在しない場合の例外処理が適切に行われること(){
+
+        when(repository.searchStudent("1")).thenReturn(null);
+
+        assertThrows(StudentNotFoundException.class, () -> sut.deleteStudent("1"));
+        verify(repository).searchStudent("1");
+        verify(repository,never()).deleteStudent("1");
+
+    }
+    @Test
+    void 受講生論理削除_論理削除済みの受講生を論理削除しようとした際の例外処理が適切に行われること(){
+        Student student = new Student();
+        student.setDeleted(true);
+
+        when(repository.searchStudent("1")).thenReturn(student);
+
+        assertThrows(StudentAlreadyDeletedException.class , () -> sut.deleteStudent("1"));
+        verify(repository,never()).deleteStudent("1");
+        verify(repository).searchStudent("1");
+
+
+    }
 }
 
