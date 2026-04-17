@@ -11,6 +11,7 @@ import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
 import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
@@ -376,8 +377,28 @@ class StudentServiceTest {
 
         sut.restoreStudent("1");
 
+        verify(repository,times(1)).restoreStudent("1");
+    }
+    @Test
+    void 受講生復元_受講生が存在しない場合に例外処理が行われること(){
+        when(repository.searchStudent("1")).thenReturn(null);
+
+        assertThrows(StudentNotFoundException.class, () -> sut.restoreStudent("1"));
+
+        verify(repository,never()).restoreStudent("1");
         verify(repository,times(1)).searchStudent("1");
-        verify(repository.ti)
+    }
+    @Test
+    void 受講生復元_受講生が復元済みの場合に例外処理が行われること(){
+        Student student = new Student();
+        student.setDeleted(false);
+
+        when(repository.searchStudent("1")).thenReturn(student);
+
+        assertThrows(StudentAlreadyActiveException.class , () -> sut.restoreStudent("1"));
+        verify(repository,times(1)).searchStudent("1");
+        verify(repository, never()).restoreStudent("1");
+
     }
 }
 
