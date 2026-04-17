@@ -93,8 +93,7 @@ class StudentServiceTest {
         //一連の流れが1回処理されているかどうかの確認
         verify(repository, times(1)).searchStudent(id);
         verify(repository, times(1)).searchStudentCourse(student.getId());
-
-
+        
     }
 
     @Test
@@ -238,8 +237,6 @@ class StudentServiceTest {
         assertNotNull(capturedCourse.getCourseEndAt());
         //終了日時が、開始日時の丁度1年後になっているか
         assertEquals(capturedCourse.getCourseStartAt().plusYears(1), capturedCourse.getCourseEndAt());
-
-
     }
 
     @Test
@@ -296,9 +293,12 @@ class StudentServiceTest {
         StudentCourse course = new StudentCourse();
         StudentDetail studentDetail = new StudentDetail();
         studentDetail.setStudent(student);
+
         List<StudentCourse> studentCourseList = new ArrayList<>();
         studentCourseList.add(course);
         studentDetail.setStudentCourseList(studentCourseList);
+
+        when(repository.searchStudent(studentDetail.getStudent().getId())).thenReturn(student);
 
         sut.updateStudent(studentDetail);
 
@@ -310,5 +310,27 @@ class StudentServiceTest {
 
         assertEquals("1", capturedCourse.getStudentId());
     }
+
+   
+
+    @Test
+    void 受講生更新_更新対象の受講生が存在しない場合の例外処理が適切に行われること(){
+        Student student = new Student();
+        student.setId("1");
+        StudentDetail studentDetail = new StudentDetail();
+        studentDetail.setStudent(student);
+
+
+        when(repository.searchStudent(studentDetail.getStudent().getId())).thenReturn(null);
+
+        assertThrows(StudentNotFoundException.class, () -> sut.updateStudent(studentDetail));
+
+        verify(repository,times(1)).searchStudent(studentDetail.getStudent().getId());
+        verify(repository,never()).updateStudent(student);
+        verify(repository,never()).updateStudentCourse(any(StudentCourse.class));
+
+
+    }
+
 }
 
