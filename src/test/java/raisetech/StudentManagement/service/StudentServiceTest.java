@@ -38,9 +38,7 @@ class StudentServiceTest {
         sut = new StudentService(repository, converter);
     }
 
-    /**
-     *
-     */
+
     @Test
     void 受講生一覧検索_repositoryとconverterの処理が適切に呼び出されること() {
 
