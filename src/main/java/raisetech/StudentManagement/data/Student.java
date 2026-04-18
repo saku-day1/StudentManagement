@@ -12,7 +12,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Student {
-
+    @NotBlank
+    @Pattern(regexp = "\\d+", message = "IDは数字で入力してください")
     private String id;
 
     @NotBlank(message = "名前は必須です")
