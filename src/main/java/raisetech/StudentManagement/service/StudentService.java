@@ -108,11 +108,11 @@ public class StudentService {
     @Transactional
     public void updateStudent(StudentDetail studentDetail) {
         Student foundStudent = repository.searchStudent(studentDetail.getStudent().getId());
-        if(foundStudent == null){
+        if (foundStudent == null) {
             throw new StudentNotFoundException(studentDetail.getStudent().getId());
         }
         repository.updateStudent(studentDetail.getStudent());
-            studentDetail.getStudentCourseList().forEach(studentCourse -> {
+        studentDetail.getStudentCourseList().forEach(studentCourse -> {
             studentCourse.setStudentId(studentDetail.getStudent().getId());
             repository.updateStudentCourse(studentCourse);
         });
@@ -122,7 +122,7 @@ public class StudentService {
      * 指定した受講生IDの論理削除を行います
      *
      * @param id 受講生ID
-     * @throws StudentNotFoundException 指定したIDの受講生が存在しない場合
+     * @throws StudentNotFoundException       指定したIDの受講生が存在しない場合
      * @throws StudentAlreadyDeletedException 指定したIDの受講生が論理削除されている場合
      */
     public void deleteStudent(String id) {
@@ -141,15 +141,15 @@ public class StudentService {
      * 指定した受講生IDの復元処理を行います
      *
      * @param id 受講生ID
-     * @throws StudentNotFoundException 指定したIDの受講生が存在しない場合
+     * @throws StudentNotFoundException      指定したIDの受講生が存在しない場合
      * @throws StudentAlreadyActiveException 指定したIDの受講生が有効状態の場合
      */
     public void restoreStudent(String id) {
         Student student = repository.searchStudent(id);
-        if (student == null){
+        if (student == null) {
             throw new StudentNotFoundException(id);
         }
-        if (!student.isDeleted()){
+        if (!student.isDeleted()) {
             throw new StudentAlreadyActiveException(id);
         }
         repository.restoreStudent(id);
