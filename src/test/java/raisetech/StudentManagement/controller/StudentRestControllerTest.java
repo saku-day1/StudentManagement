@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
+import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
@@ -76,6 +77,48 @@ class StudentRestControllerTest {
 
         assertThat(violations.size()).isEqualTo(1);
         assertThat(violations).extracting("message").containsOnly("IDは数字で入力してください");
+    }
+
+    @Test
+    void 受講生の詳細検索が実行できて取得した受講生詳細とステータス200が返却されること() throws Exception {
+        String id = "1";
+
+        Student student = new Student();
+        student.setId("1");
+        student.setName("山本健");
+        student.setFurigana("ヤマモトケン");
+        student.setEmail("yamamoto.ken@example.com");
+        student.setArea("福岡");
+
+        StudentCourse course = new StudentCourse();
+        course.setCourseName("Webデザインコース");
+
+        StudentDetail studentDetail = new StudentDetail();
+        studentDetail.setStudent(student);
+        studentDetail.setStudentCourseList(List.of(course));
+
+        when(service.searchStudent(id)).thenReturn(studentDetail);
+        mockMvc.perform(get("/api/students/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.student.id").value("1"))
+                .andExpect(jsonPath("$.student.name").value("山本健"))
+                .andExpect(jsonPath("$.student.furigana").value("ヤマモトケン"))
+                .andExpect(jsonPath("$.student.email").value("yamamoto.ken@example.com"))
+                .andExpect(jsonPath("$.student.area").value("福岡"))
+                .andExpect(jsonPath("$.studentCourseList[0].courseName").value("Webデザインコース"));
+        verify(service, times(1)).searchStudent(id);
+    }
+
+    @Test
+    void 存在しないIDで受講生詳細を検索したときに404エラーが返ってくること() throws Exception {
+        String id = "999";
+        doThrow(new StudentNotFoundException(id))
+                .when(service).searchStudent(id);
+        mockMvc.perform(get("/api/students/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("受講生ID：999 が見つかりません。"));
+
+        verify(service, times(1)).searchStudent(id);
     }
 
     @Test
@@ -324,22 +367,22 @@ class StudentRestControllerTest {
     void 受講生復元時に存在しないIDでリクエストを送った際に404エラーが返ってくること() throws Exception {
         String id = "999";
         doThrow(new StudentNotFoundException(id)).when(service).restoreStudent(id);
-        mockMvc.perform(patch("/api/students/{id}/restore",id))
+        mockMvc.perform(patch("/api/students/{id}/restore", id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("受講生ID：999 が見つかりません。"));
-        verify(service,times(1)).restoreStudent(id);
+        verify(service, times(1)).restoreStudent(id);
     }
+
     @Test
-    void すでに復元処理済みの受講生IDを復元しようとした際に409エラーが返ってくること() throws Exception{
+    void すでに復元処理済みの受講生IDを復元しようとした際に409エラーが返ってくること() throws Exception {
         String id = "1";
         doThrow(new StudentAlreadyActiveException(id))
                 .when(service).restoreStudent(id);
-        mockMvc.perform(patch("/api/students/{id}/restore",id))
+        mockMvc.perform(patch("/api/students/{id}/restore", id))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("受講生ID：1 はすでに有効状態のため復元できません。"));
-        verify(service,times(1)).restoreStudent(id);
+        verify(service, times(1)).restoreStudent(id);
     }
-
 }
 
 
