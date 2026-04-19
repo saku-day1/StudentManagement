@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.service.StudentService;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(StudentRestController.class)
@@ -111,8 +113,9 @@ class StudentRestControllerTest {
         //登録処理の中でサービスクラスが1回だけ呼ばれたことを確認
         verify(service, times(1)).registerStudent(any(StudentDetail.class));
     }
+
     @Test
-    void 受講生登録でnameが空文字のときに400エラーとエラーメッセージが返ること() throws Exception{
+    void 受講生登録でnameが空文字のときに400エラーとエラーメッセージが返ること() throws Exception {
         //準備
         String json = """
                 {
@@ -132,16 +135,52 @@ class StudentRestControllerTest {
                                             }
                 """;
         mockMvc.perform(post("/api/students")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
 
-        )
+                )
                 //実行
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("student.name: 名前は必須です"));
         //検証
-        verify(service,never()).registerStudent(any(StudentDetail.class));
+        verify(service, never()).registerStudent(any(StudentDetail.class));
     }
+
     @Test
+    void 受講生登録でemailがすでに登録済みの場合に409エラーとエラーメッセージが返ること() throws Exception {
+        String json = """
+                {
+                                              "student": {
+                                                "id": "1",
+                                                "name": "山田 太郎",
+                                                "furigana": "ヤマダタロウ",
+                                                "email": "yamada@example.com",
+                                                "area": "東京都"
+                                              },
+                                              "studentCourseList":[{
+                                                  "id": "1",
+                                                  "studentId": "1",
+                                                  "courseName": "Javaコース"
+                                                }
+                                                ]
+                                            }
+                """;
+        //戻り値がないため、doThrow
+        //登録処理ではなくメールの重複が起きたと想定して例外処理が発生したと動作を変更する
+        doThrow(new DuplicateEmailException("yamada@example.com はすでに使われているメールアドレスです"))
+                .when(service).registerStudent(any(StudentDetail.class));
+        mockMvc.perform(
+                        post("/api/students")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)
+                )
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message")
+                        .value("yamada@example.com はすでに使われているメールアドレスです"));
+        verify(service, times(1)).registerStudent(any(StudentDetail.class));
+
+    }
+
 
 }
