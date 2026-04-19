@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
 
 import java.util.List;
@@ -204,7 +205,6 @@ class StudentRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                 )
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("受講生情報を更新しました"));
         ArgumentCaptor<StudentDetail> captor = ArgumentCaptor.forClass(StudentDetail.class);
@@ -243,6 +243,34 @@ class StudentRestControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("student.name: 名前は必須です"));
         verify(service,never()).updateStudent(any(StudentDetail.class));
+    }
+    @Test
+    void 受講生更新時に存在しないIDを送信した場合に404エラーが返ってくること() throws Exception{
+        String id = "999";
+        String json = """
+                {
+                                              "student": {
+                                                "name": "山田 太郎",
+                                                "furigana": "ヤマダタロウ",
+                                                "email": "yamada@example.com",
+                                                "area": "東京都"
+                                              },
+                                              "studentCourseList":[{
+                                                  "courseName": "Javaコース"
+                                                }
+                                                ]
+                                            }
+                """;
+        doThrow(new StudentNotFoundException(id))
+                .when(service).updateStudent(any(StudentDetail.class));
+        mockMvc.perform(put("/api/students/{id}",999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                .value("受講生ID：999 が見つかりません。"));
+
+        verify(service,times(1)).updateStudent(any(StudentDetail.class));
     }
     }
 
