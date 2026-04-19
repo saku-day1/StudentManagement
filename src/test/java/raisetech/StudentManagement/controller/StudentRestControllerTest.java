@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,9 +19,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -81,15 +82,12 @@ class StudentRestControllerTest {
         String json = """
                 {
                                               "student": {
-                                                "id": "1",
                                                 "name": "山田 太郎",
                                                 "furigana": "ヤマダタロウ",
                                                 "email": "yamada@example.com",
                                                 "area": "東京都"
                                               },
                                               "studentCourseList":[{
-                                                  "id": "1",
-                                                  "studentId": "1",
                                                   "courseName": "Javaコース"
                                                 }
                                                 ]
@@ -107,9 +105,21 @@ class StudentRestControllerTest {
                 //実際のレスポンスが201　Createdであることを確認
                 .andExpect(status().isCreated())
                 //実際に返却されるmessage(JSON)を確認
-                .andExpect(jsonPath("$.message").value("登録処理が成功しました"))
-                //実際に返却されるstudentId(JSON)を確認し返却されるID情報が"1"であることを確認
-                .andExpect(jsonPath("$.studentId").value("1"));
+                .andExpect(jsonPath("$.message").value("登録処理が成功しました"));
+        //StudentDetailを掴まえるようのArgumentCaptorを用意
+        ArgumentCaptor<StudentDetail> captor = ArgumentCaptor.forClass(StudentDetail.class);
+        //registerStudent()に対して渡された引数をいれる
+        verify(service).registerStudent(captor.capture());
+        //捕まえたStudentDetailをcapturedStudentとして取り出す
+        StudentDetail capturedStudent = captor.getValue();
+        //検証
+        //取り出したStudentDetailの中身の照合
+        assertEquals("山田 太郎",capturedStudent.getStudent().getName());
+        assertEquals("ヤマダタロウ",capturedStudent.getStudent().getFurigana());
+        assertEquals("yamada@example.com",capturedStudent.getStudent().getEmail());
+        assertEquals("東京都",capturedStudent.getStudent().getArea());
+        assertEquals(1,capturedStudent.getStudentCourseList().size());
+        assertEquals("Javaコース",capturedStudent.getStudentCourseList().get(0).getCourseName());
         //登録処理の中でサービスクラスが1回だけ呼ばれたことを確認
         verify(service, times(1)).registerStudent(any(StudentDetail.class));
     }
@@ -120,15 +130,12 @@ class StudentRestControllerTest {
         String json = """
                 {
                                               "student": {
-                                                "id": "1",
                                                 "name": "",
                                                 "furigana": "ヤマダタロウ",
                                                 "email": "yamada@example.com",
                                                 "area": "東京都"
                                               },
                                               "studentCourseList":[{
-                                                  "id": "1",
-                                                  "studentId": "1",
                                                   "courseName": "Javaコース"
                                                 }
                                                 ]
@@ -151,15 +158,12 @@ class StudentRestControllerTest {
         String json = """
                 {
                                               "student": {
-                                                "id": "1",
                                                 "name": "山田 太郎",
                                                 "furigana": "ヤマダタロウ",
                                                 "email": "yamada@example.com",
                                                 "area": "東京都"
                                               },
                                               "studentCourseList":[{
-                                                  "id": "1",
-                                                  "studentId": "1",
                                                   "courseName": "Javaコース"
                                                 }
                                                 ]
@@ -181,6 +185,60 @@ class StudentRestControllerTest {
         verify(service, times(1)).registerStudent(any(StudentDetail.class));
 
     }
+    @Test
+    void 受講生更新で更新処理のリクエストを送信した時に成功メッセージが返ること() throws Exception{
+        //準備
+        String json = """
+                {
+                                              "student": {
+                                                "name": "山田 太郎",
+                                                "furigana": "ヤマダタロウ",
+                                                "email": "yamada@example.com",
+                                                "area": "東京都"
+                                              },
+                                              "studentCourseList":[{
+                                                  "courseName": "Javaコース"
+                                                }
+                                                ]
+                                            }
+                """;
+        mockMvc.perform(put("/api/students/{id}",1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("受講生情報を更新しました"))
+                .andExpect(jsonPath("$.studentId").value("1"));
+        verify(service, times(1)).updateStudent(any(StudentDetail.class));
+    }
+    @Test
+    void 受講生更新で名前が未入力の場合に400エラーが返ること() throws Exception{
+        String json = """
+                {
+                                              "student": {
+                                                "name": "",
+                                                "furigana": "ヤマダタロウ",
+                                                "email": "yamada@example.com",
+                                                "area": "東京都"
+                                              },
+                                              "studentCourseList":[{
+                                                  "courseName": "Javaコース"
+                                                }
+                                                ]
+                                            }
+                """;
+        mockMvc.perform(put("/api/students/{id}",1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                )
+                //実行
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("student.name: 名前は必須です"));
+        verify(service,never()).updateStudent(any(StudentDetail.class));
+    }
+    }
 
 
-}
+
