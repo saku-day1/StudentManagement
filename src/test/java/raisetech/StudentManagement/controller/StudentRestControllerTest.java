@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
 import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
@@ -306,7 +307,37 @@ class StudentRestControllerTest {
         mockMvc.perform(delete("/api/students/{id}", id))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("受講生ID：1 はすでに論理削除済みです。"));
-        verify(service,times(1)).deleteStudent(id);
+        verify(service, times(1)).deleteStudent(id);
+    }
+
+    @Test
+    void 受講生復元時にリクエストを送った際にステータス200と受講生IDとメッセージが返却されること() throws Exception {
+        String id = "1";
+        mockMvc.perform(patch("/api/students/{id}/restore", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("受講生情報を復元しました"))
+                .andExpect(jsonPath("$.studentId").value(id));
+        verify(service, times(1)).restoreStudent(id);
+    }
+
+    @Test
+    void 受講生復元時に存在しないIDでリクエストを送った際に404エラーが返ってくること() throws Exception {
+        String id = "999";
+        doThrow(new StudentNotFoundException(id)).when(service).restoreStudent(id);
+        mockMvc.perform(patch("/api/students/{id}/restore",id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("受講生ID：999 が見つかりません。"));
+        verify(service,times(1)).restoreStudent(id);
+    }
+    @Test
+    void すでに復元処理済みの受講生IDを復元しようとした際に409エラーが返ってくること() throws Exception{
+        String id = "1";
+        doThrow(new StudentAlreadyActiveException(id))
+                .when(service).restoreStudent(id);
+        mockMvc.perform(patch("/api/students/{id}/restore",id))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("受講生ID：1 はすでに有効状態のため復元できません。"));
+        verify(service,times(1)).restoreStudent(id);
     }
 
 }
