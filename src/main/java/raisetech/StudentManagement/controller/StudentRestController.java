@@ -197,7 +197,7 @@ public class StudentRestController {
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です
+                                              "message": "student.name: 名前は必須です"
                                             }
                                             """)
                     )
