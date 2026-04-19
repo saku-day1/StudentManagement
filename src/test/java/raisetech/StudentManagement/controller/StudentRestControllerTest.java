@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
 import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -115,12 +116,12 @@ class StudentRestControllerTest {
         StudentDetail capturedStudent = captor.getValue();
         //検証
         //取り出したStudentDetailの中身の照合
-        assertEquals("山田 太郎",capturedStudent.getStudent().getName());
-        assertEquals("ヤマダタロウ",capturedStudent.getStudent().getFurigana());
-        assertEquals("yamada@example.com",capturedStudent.getStudent().getEmail());
-        assertEquals("東京都",capturedStudent.getStudent().getArea());
-        assertEquals(1,capturedStudent.getStudentCourseList().size());
-        assertEquals("Javaコース",capturedStudent.getStudentCourseList().get(0).getCourseName());
+        assertEquals("山田 太郎", capturedStudent.getStudent().getName());
+        assertEquals("ヤマダタロウ", capturedStudent.getStudent().getFurigana());
+        assertEquals("yamada@example.com", capturedStudent.getStudent().getEmail());
+        assertEquals("東京都", capturedStudent.getStudent().getArea());
+        assertEquals(1, capturedStudent.getStudentCourseList().size());
+        assertEquals("Javaコース", capturedStudent.getStudentCourseList().get(0).getCourseName());
     }
 
     @Test
@@ -177,15 +178,15 @@ class StudentRestControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json)
                 )
-                .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
                         .value("yamada@example.com はすでに使われているメールアドレスです"));
         verify(service, times(1)).registerStudent(any(StudentDetail.class));
 
     }
+
     @Test
-    void 受講生更新で更新処理のリクエストを送信した時に成功メッセージが返ること() throws Exception{
+    void 受講生更新で更新処理のリクエストを送信した時に成功メッセージが返ること() throws Exception {
         //準備
         String json = """
                 {
@@ -201,7 +202,7 @@ class StudentRestControllerTest {
                                                 ]
                                             }
                 """;
-        mockMvc.perform(put("/api/students/{id}",1)
+        mockMvc.perform(put("/api/students/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                 )
@@ -211,15 +212,16 @@ class StudentRestControllerTest {
         verify(service).updateStudent(captor.capture());
         StudentDetail capturedStudent = captor.getValue();
         assertEquals("1", capturedStudent.getStudent().getId());
-        assertEquals("山田 太郎",capturedStudent.getStudent().getName());
-        assertEquals("ヤマダタロウ",capturedStudent.getStudent().getFurigana());
-        assertEquals("yamada@example.com",capturedStudent.getStudent().getEmail());
-        assertEquals("東京都",capturedStudent.getStudent().getArea());
-        assertEquals(1,capturedStudent.getStudentCourseList().size());
-        assertEquals("Javaコース",capturedStudent.getStudentCourseList().get(0).getCourseName());
+        assertEquals("山田 太郎", capturedStudent.getStudent().getName());
+        assertEquals("ヤマダタロウ", capturedStudent.getStudent().getFurigana());
+        assertEquals("yamada@example.com", capturedStudent.getStudent().getEmail());
+        assertEquals("東京都", capturedStudent.getStudent().getArea());
+        assertEquals(1, capturedStudent.getStudentCourseList().size());
+        assertEquals("Javaコース", capturedStudent.getStudentCourseList().get(0).getCourseName());
     }
+
     @Test
-    void 受講生更新で名前が未入力の場合に400エラーが返ること() throws Exception{
+    void 受講生更新で名前が未入力の場合に400エラーが返ること() throws Exception {
         String json = """
                 {
                                               "student": {
@@ -234,7 +236,7 @@ class StudentRestControllerTest {
                                                 ]
                                             }
                 """;
-        mockMvc.perform(put("/api/students/{id}",1)
+        mockMvc.perform(put("/api/students/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                 )
@@ -242,10 +244,11 @@ class StudentRestControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("student.name: 名前は必須です"));
-        verify(service,never()).updateStudent(any(StudentDetail.class));
+        verify(service, never()).updateStudent(any(StudentDetail.class));
     }
+
     @Test
-    void 受講生更新時に存在しないIDを送信した場合に404エラーが返ってくること() throws Exception{
+    void 受講生更新時に存在しないIDを送信した場合に404エラーが返ってくること() throws Exception {
         String id = "999";
         String json = """
                 {
@@ -263,16 +266,51 @@ class StudentRestControllerTest {
                 """;
         doThrow(new StudentNotFoundException(id))
                 .when(service).updateStudent(any(StudentDetail.class));
-        mockMvc.perform(put("/api/students/{id}",999)
+        mockMvc.perform(put("/api/students/{id}", 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .content(json))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                .value("受講生ID：999 が見つかりません。"));
+                        .value("受講生ID：999 が見つかりません。"));
 
-        verify(service,times(1)).updateStudent(any(StudentDetail.class));
+        verify(service, times(1)).updateStudent(any(StudentDetail.class));
     }
+
+    @Test
+    void 受講生論理削除時にリクエストを送った際にステータス200と受講生IDとメッセージが返却されること() throws Exception {
+        String id = "1";
+        mockMvc.perform(delete("/api/students/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("受講生を論理削除しました"))
+                .andExpect(jsonPath("$.studentId").value(id));
+        verify(service, times(1)).deleteStudent(id);
     }
+
+    @Test
+    void 受講生の論理削除時に存在しないIDでリクエストを送ったときにステータス404エラーが返ってくること() throws Exception {
+        String id = "999";
+        doThrow(new StudentNotFoundException(id))
+                .when(service).deleteStudent(id);
+        mockMvc.perform(delete("/api/students/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("受講生ID：999 が見つかりません。"));
+        verify(service, times(1)).deleteStudent(id);
+
+    }
+
+    @Test
+    void すでに論理削除済みの受講生を削除しようとした時にステータス409エラーが返ってくること() throws Exception {
+        String id = "1";
+        doThrow(new StudentAlreadyDeletedException(id))
+                .when(service).deleteStudent(id);
+        mockMvc.perform(delete("/api/students/{id}", id))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("受講生ID：1 はすでに論理削除済みです。"));
+        verify(service,times(1)).deleteStudent(id);
+    }
+
+}
+
 
 
 
