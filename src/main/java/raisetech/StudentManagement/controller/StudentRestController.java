@@ -313,7 +313,7 @@ public class StudentRestController {
                                             }
                                             """)
                     ))})
-    @PutMapping("/{id}/restore")
+    @PatchMapping("/{id}/restore")
     public ResponseEntity<ResultMessage> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.restoreStudent(id);
