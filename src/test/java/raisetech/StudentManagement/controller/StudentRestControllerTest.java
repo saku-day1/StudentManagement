@@ -120,8 +120,6 @@ class StudentRestControllerTest {
         assertEquals("東京都",capturedStudent.getStudent().getArea());
         assertEquals(1,capturedStudent.getStudentCourseList().size());
         assertEquals("Javaコース",capturedStudent.getStudentCourseList().get(0).getCourseName());
-        //登録処理の中でサービスクラスが1回だけ呼ばれたことを確認
-        verify(service, times(1)).registerStudent(any(StudentDetail.class));
     }
 
     @Test
