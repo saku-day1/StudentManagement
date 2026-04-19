@@ -206,9 +206,17 @@ class StudentRestControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("受講生情報を更新しました"))
-                .andExpect(jsonPath("$.studentId").value("1"));
-        verify(service, times(1)).updateStudent(any(StudentDetail.class));
+                .andExpect(jsonPath("$.message").value("受講生情報を更新しました"));
+        ArgumentCaptor<StudentDetail> captor = ArgumentCaptor.forClass(StudentDetail.class);
+        verify(service).updateStudent(captor.capture());
+        StudentDetail capturedStudent = captor.getValue();
+        assertEquals("1", capturedStudent.getStudent().getId());
+        assertEquals("山田 太郎",capturedStudent.getStudent().getName());
+        assertEquals("ヤマダタロウ",capturedStudent.getStudent().getFurigana());
+        assertEquals("yamada@example.com",capturedStudent.getStudent().getEmail());
+        assertEquals("東京都",capturedStudent.getStudent().getArea());
+        assertEquals(1,capturedStudent.getStudentCourseList().size());
+        assertEquals("Javaコース",capturedStudent.getStudentCourseList().get(0).getCourseName());
     }
     @Test
     void 受講生更新で名前が未入力の場合に400エラーが返ること() throws Exception{
