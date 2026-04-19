@@ -93,7 +93,7 @@ class StudentRestControllerTest {
                                                 ]
                                             }
                 """;
-        //HTTPに大して疑似的に送っているリクエスト
+        //HTTPリクエストを疑似的に送信
         mockMvc.perform(post("/api/students")
                         //送るデータの形式の指定
                         //今回はJSONを送る
@@ -111,5 +111,37 @@ class StudentRestControllerTest {
         //登録処理の中でサービスクラスが1回だけ呼ばれたことを確認
         verify(service, times(1)).registerStudent(any(StudentDetail.class));
     }
+    @Test
+    void 受講生登録でnameが空文字のときに400エラーとエラーメッセージが返ること() throws Exception{
+        //準備
+        String json = """
+                {
+                                              "student": {
+                                                "id": "1",
+                                                "name": "",
+                                                "furigana": "ヤマダタロウ",
+                                                "email": "yamada@example.com",
+                                                "area": "東京都"
+                                              },
+                                              "studentCourseList":[{
+                                                  "id": "1",
+                                                  "studentId": "1",
+                                                  "courseName": "Javaコース"
+                                                }
+                                                ]
+                                            }
+                """;
+        mockMvc.perform(post("/api/students")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+
+        )
+                //実行
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("student.name: 名前は必須です"));
+        //検証
+        verify(service,never()).registerStudent(any(StudentDetail.class));
+    }
+    @Test
 
 }
