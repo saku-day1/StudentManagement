@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
-import raisetech.StudentManagement.dto.ApiResponse;
+import raisetech.StudentManagement.dto.ApiResult;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
 import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleStudentNotFoundException(StudentNotFoundException e) {
+    public ResponseEntity<ApiResult<Void>> handleStudentNotFoundException(StudentNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildErrorResponse(e.getMessage()));
     }
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateEmailException(DuplicateEmailException e) {
+    public ResponseEntity<ApiResult<Void>> handleDuplicateEmailException(DuplicateEmailException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(buildErrorResponse(e.getMessage()));
     }
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
+    public ResponseEntity<ApiResult<Void>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
 
         String message = e.getBindingResult().getFieldErrors()
@@ -91,7 +91,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(
+    public ResponseEntity<ApiResult<Void>> handleConstraintViolationException(
             ConstraintViolationException e) {
 
         String message = e.getConstraintViolations().stream()
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
+    public ResponseEntity<ApiResult<Void>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException e) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -131,7 +131,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHandlerMethodValidationException(
+    public ResponseEntity<ApiResult<Void>> handleHandlerMethodValidationException(
             HandlerMethodValidationException e) {
 
         String message = e.getAllErrors().stream()
@@ -150,7 +150,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentAlreadyDeletedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleStudentAlreadyDeletedException(
+    public ResponseEntity<ApiResult<Void>> handleStudentAlreadyDeletedException(
             StudentAlreadyDeletedException e) {
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -165,7 +165,7 @@ public class GlobalExceptionHandler {
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentAlreadyActiveException.class)
-    public ResponseEntity<ApiResponse<Void>> handleStudentAlreadyActiveException(
+    public ResponseEntity<ApiResult<Void>> handleStudentAlreadyActiveException(
             StudentAlreadyActiveException e) {
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -178,8 +178,8 @@ public class GlobalExceptionHandler {
      * @param message エラーメッセージ
      * @return status, message, data から成るエラーレスポンス
      */
-    private ApiResponse<Void> buildErrorResponse(String message) {
-        return new ApiResponse<>("error", message, null);
+    private ApiResult<Void> buildErrorResponse(String message) {
+        return new ApiResult<>("error", message, null);
     }
 }
 

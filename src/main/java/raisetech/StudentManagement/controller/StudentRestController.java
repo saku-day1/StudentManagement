@@ -3,6 +3,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.dto.ApiResponse;
+import raisetech.StudentManagement.dto.ApiResult;
 import raisetech.StudentManagement.dto.ErrorMessage;
 import raisetech.StudentManagement.dto.ResultMessage;
 import raisetech.StudentManagement.dto.StudentIdResponse;
@@ -44,10 +45,10 @@ public class StudentRestController {
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = StudentDetail.class))))
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StudentDetail>>> getStudentList() {
+    public ResponseEntity<ApiResult<List<StudentDetail>>> getStudentList() {
         List<StudentDetail> studentList = service.searchStudentList();
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         "success",
                         "受講生一覧を取得しました",
                         studentList
@@ -116,11 +117,11 @@ public class StudentRestController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<StudentDetail>> getStudent(
+    public ResponseEntity<ApiResult<StudentDetail>> getStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         StudentDetail student = service.searchStudent(id);
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         "success",
                         "受講生詳細を取得しました",
                         student
@@ -172,11 +173,11 @@ public class StudentRestController {
             )
     })
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentIdResponse>> registerStudent(
+    public ResponseEntity<ApiResult<StudentIdResponse>> registerStudent(
             @Valid @RequestBody StudentDetail studentDetail) {
         service.registerStudent(studentDetail);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ApiResponse<>(
+                new ApiResult<>(
                         "success",
                         "登録処理が成功しました",
                         new StudentIdResponse(studentDetail.getStudent().getId())
@@ -272,11 +273,11 @@ public class StudentRestController {
                                             """)
                     ))})
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<StudentIdResponse>> deleteStudent(
+    public ResponseEntity<ApiResult<StudentIdResponse>> deleteStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.deleteStudent(id);
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         "success",
                         "受講生を論理削除しました",
                         new StudentIdResponse(id)
@@ -326,11 +327,11 @@ public class StudentRestController {
                                             """)
                     ))})
     @PatchMapping("/{id}/restore")
-    public ResponseEntity<ApiResponse<StudentIdResponse>> restoreStudent(
+    public ResponseEntity<ApiResult<StudentIdResponse>> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.restoreStudent(id);
         return ResponseEntity.ok(
-                new ApiResponse<>(
+                new ApiResult<>(
                         "success",
                         "受講生情報を復元しました",
                         new StudentIdResponse(id)
