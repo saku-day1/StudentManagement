@@ -1,6 +1,5 @@
 package raisetech.StudentManagement.handler;
 
-import jakarta.annotation.Nonnull;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.MessageSourceResolvable;
@@ -11,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
-import raisetech.StudentManagement.dto.ErrorMessage;
+import raisetech.StudentManagement.dto.ApiResponse;
 import raisetech.StudentManagement.exception.DuplicateEmailException;
 import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
 import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
@@ -21,45 +20,56 @@ import java.util.stream.Collectors;
 
 /**
  * 受講生管理システムで発生する各種例外をハンドリングし、
- * エラーメッセージをレスポンスとして返却するクラスです。
+ * 統一形式のエラーレスポンスを返却するクラスです。
+ *
+ * <p>レスポンス形式は {@code ApiResponse<Void>} とし、
+ * エラー時は {@code status} に {@code "error"}、
+ * {@code message} にエラー内容、
+ * {@code data} に {@code null} を設定します。</p>
  */
 @RestControllerAdvice
-
 public class GlobalExceptionHandler {
+
     /**
-     * 受講生が見つからない場合の例外を処理し、
-     * 404 Not Found のエラーレスポンスを返却します。
+     * 指定した受講生が存在しない場合の例外を処理し、
+     * 404 Not Found のレスポンスを返却します。
      *
-     * @param e 受講生が見つからなかった場合の例外
+     * @param e 受講生が見つからない場合の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentNotFoundException.class)
-    public ResponseEntity<ErrorMessage> handleStudentException(StudentNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorMessage(e.getMessage()));
-
+    public ResponseEntity<ApiResponse<Void>> handleStudentNotFoundException(StudentNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildErrorResponse(e.getMessage()));
     }
 
     /**
      * 重複したメールアドレスが指定された場合の例外を処理し、
-     * 409 Conflict のエラーレスポンスを返却します。
+     * 409 Conflict のレスポンスを返却します。
      *
      * @param e メールアドレス重複時の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<ErrorMessage> handleDuplicateEmail(DuplicateEmailException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorMessage(e.getMessage()));
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateEmailException(DuplicateEmailException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
     }
 
     /**
-     * リクエストボディのバリデーションエラーを処理し、
-     * 400 Bad Request のエラーレスポンスを返却します。
+     * リクエストボディに対するバリデーションエラーを処理し、
+     * 400 Bad Request のレスポンスを返却します。
      *
-     * @param e バリデーションエラー
+     * <p>各フィールドエラーのメッセージを連結して返却します。
+     * また、studentCourseList の添字付きフィールド名は見やすい形に整形します。</p>
+     *
+     * @param e リクエストボディのバリデーションエラー
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorMessage> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
+
         String message = e.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> {
@@ -69,18 +79,19 @@ public class GlobalExceptionHandler {
                 })
                 .collect(Collectors.joining(", "));
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse(message));
     }
 
     /**
-     * メソッド引数のバリデーションエラーを処理し、
-     * 400 Bad Request のエラーレスポンスを返却します。
+     * パスパラメータやリクエストパラメータに対するバリデーションエラーを処理し、
+     * 400 Bad Request のレスポンスを返却します。
      *
-     * @param e バリデーションエラー
+     * @param e 制約違反が発生した場合の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorMessage> handleConstraintViolationException(
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(
             ConstraintViolationException e) {
 
         String message = e.getConstraintViolations().stream()
@@ -88,74 +99,87 @@ public class GlobalExceptionHandler {
                 .map(ConstraintViolation::getMessage)
                 .orElse("入力値が不正です。");
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorMessage(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse(message));
     }
 
     /**
      * リクエストボディの読み取りに失敗した場合の例外を処理し、
-     * 400 Bad Request のエラーレスポンスを返却します。
+     * 400 Bad Request のレスポンスを返却します。
+     *
+     * <p>主に、JSONの構文不正や型不一致などで発生します。</p>
      *
      * @param e リクエストボディの読み取り失敗時の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorMessage> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage("入力値の型が正しくありません");
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException e) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse("入力値の型が正しくありません"));
     }
 
     /**
-     * リクエストパラメータやパスパラメータのバリデーションエラーを処理し、
-     * 400 Bad Request のエラーレスポンスを返却します。
+     * メソッド引数に対するバリデーションエラーを処理し、
+     * 400 Bad Request のレスポンスを返却します。
+     *
+     * <p>主に、{@code @PathVariable} や {@code @RequestParam} に付与した
+     * バリデーションアノテーションの検証失敗時に発生します。</p>
      *
      * @param e メソッド引数のバリデーションエラー
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorMessage> handleHandlerMethodValidationException(
+    public ResponseEntity<ApiResponse<Void>> handleHandlerMethodValidationException(
             HandlerMethodValidationException e) {
+
         String message = e.getAllErrors().stream()
                 .map(MessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorMessage(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorResponse(message));
     }
 
     /**
      * すでに論理削除済みの受講生を削除しようとした場合の例外を処理し、
-     * 409 Conflict のエラーレスポンスを返却します。
+     * 409 Conflict のレスポンスを返却します。
      *
      * @param e すでに論理削除済みの受講生に対する削除操作時の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentAlreadyDeletedException.class)
-    public ResponseEntity<ErrorMessage> handleStudentAlreadyDeletedException(StudentAlreadyDeletedException e) {
-        ErrorMessage errorMessage = getErrorMessage(e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+    public ResponseEntity<ApiResponse<Void>> handleStudentAlreadyDeletedException(
+            StudentAlreadyDeletedException e) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
     }
 
     /**
      * すでに有効状態の受講生を復元しようとした場合の例外を処理し、
-     * 409 Conflict のエラーレスポンスを返却します。
+     * 409 Conflict のレスポンスを返却します。
      *
      * @param e すでに有効状態の受講生に対する復元操作時の例外
      * @return エラーメッセージを含むレスポンス
      */
     @ExceptionHandler(StudentAlreadyActiveException.class)
-    public ResponseEntity<ErrorMessage> handleStudentAlreadyActiveException(StudentAlreadyActiveException e) {
-        ErrorMessage errorMessage = getErrorMessage(e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+    public ResponseEntity<ApiResponse<Void>> handleStudentAlreadyActiveException(
+            StudentAlreadyActiveException e) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
     }
 
-    @Nonnull
-    private static ErrorMessage getErrorMessage(RuntimeException e) {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setMessage(e.getMessage());
-        return errorMessage;
+    /**
+     * 統一形式のエラーレスポンスを生成します。
+     *
+     * @param message エラーメッセージ
+     * @return status, message, data から成るエラーレスポンス
+     */
+    private ApiResponse<Void> buildErrorResponse(String message) {
+        return new ApiResponse<>("error", message, null);
     }
 }
 

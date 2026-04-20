@@ -1,11 +1,8 @@
-package raisetech.StudentManagement.controller;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -14,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.dto.ApiResponse;
 import raisetech.StudentManagement.dto.ErrorMessage;
 import raisetech.StudentManagement.dto.ResultMessage;
+import raisetech.StudentManagement.dto.StudentIdResponse;
 import raisetech.StudentManagement.service.StudentService;
 
 import java.util.List;
@@ -45,10 +44,16 @@ public class StudentRestController {
             content = @Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = StudentDetail.class))))
     @GetMapping
-    public List<StudentDetail> getStudentList() {
-        return service.searchStudentList();
+    public ResponseEntity<ApiResponse<List<StudentDetail>>> getStudentList() {
+        List<StudentDetail> studentList = service.searchStudentList();
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "success",
+                        "受講生一覧を取得しました",
+                        studentList
+                )
+        );
     }
-
     /**
      * 指定した受講生IDに紐づく受講生詳細を取得します。
      *
@@ -111,11 +116,17 @@ public class StudentRestController {
             )
     })
     @GetMapping("/{id}")
-    public StudentDetail getStudent(
+    public ResponseEntity<ApiResponse<StudentDetail>> getStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
-        return service.searchStudent(id);
+        StudentDetail student = service.searchStudent(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "success",
+                        "受講生詳細を取得しました",
+                        student
+                )
+        );
     }
-
 
     /**
      * 受講生詳細を登録します。
@@ -161,13 +172,16 @@ public class StudentRestController {
             )
     })
     @PostMapping
-    public ResponseEntity<ResultMessage> registerStudent(
+    public ResponseEntity<ApiResponse<StudentIdResponse>> registerStudent(
             @Valid @RequestBody StudentDetail studentDetail) {
         service.registerStudent(studentDetail);
-        ResultMessage resultMessage = new ResultMessage();
-        resultMessage.setMessage("登録処理が成功しました");
-        resultMessage.setStudentId(studentDetail.getStudent().getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(resultMessage);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ApiResponse<>(
+                        "success",
+                        "登録処理が成功しました",
+                        new StudentIdResponse(studentDetail.getStudent().getId())
+                )
+        );
     }
 
     /**
@@ -215,14 +229,6 @@ public class StudentRestController {
                     )
             )
     })
-    @PutMapping("/{id}")
-    public ResponseEntity<ResultMessage> updateStudent(
-            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id,
-            @Valid @RequestBody StudentDetail studentDetail) {
-        studentDetail.getStudent().setId(id);
-        service.updateStudent(studentDetail);
-        return ResponseEntity.ok(new ResultMessage("受講生情報を更新しました", id));
-    }
 
     /**
      * 指定したIDの受講生情報を論理削除します。
@@ -266,10 +272,16 @@ public class StudentRestController {
                                             """)
                     ))})
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResultMessage> deleteStudent(
+    public ResponseEntity<ApiResponse<StudentIdResponse>> deleteStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.deleteStudent(id);
-        return ResponseEntity.ok(new ResultMessage("受講生を論理削除しました", id));
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "success",
+                        "受講生を論理削除しました",
+                        new StudentIdResponse(id)
+                )
+        );
     }
 
     /**
@@ -314,9 +326,15 @@ public class StudentRestController {
                                             """)
                     ))})
     @PatchMapping("/{id}/restore")
-    public ResponseEntity<ResultMessage> restoreStudent(
+    public ResponseEntity<ApiResponse<StudentIdResponse>> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.restoreStudent(id);
-        return ResponseEntity.ok(new ResultMessage("受講生情報を復元しました", id));
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "success",
+                        "受講生情報を復元しました",
+                        new StudentIdResponse(id)
+                )
+        );
     }
 }
