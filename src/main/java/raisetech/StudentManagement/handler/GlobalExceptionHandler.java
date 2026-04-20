@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 受講生管理システムで発生する各種例外をハンドリングし、
  * 統一形式のエラーレスポンスを返却するクラスです。
  *
- * <p>レスポンス形式は {@code ApiResponse<Void>} とし、
+ * <p>レスポンス形式は {@code ApiResult<Void>} とし、
  * エラー時は {@code status} に {@code "error"}、
  * {@code message} にエラー内容、
  * {@code data} に {@code null} を設定します。</p>
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException e) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(buildErrorResponse("入力値の型が正しくありません"));
+                .body(buildErrorResponse("入力値が不正です"));
     }
 
     /**

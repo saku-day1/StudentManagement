@@ -1,5 +1,6 @@
+package raisetech.StudentManagement.controller;
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,8 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.ApiResult;
-import raisetech.StudentManagement.dto.ErrorMessage;
-import raisetech.StudentManagement.dto.ResultMessage;
 import raisetech.StudentManagement.dto.StudentIdResponse;
 import raisetech.StudentManagement.service.StudentService;
 
@@ -23,7 +22,6 @@ import java.util.List;
 /**
  * 受講生情報の検索、登録、更新、削除、復元をREST APIとして受け付けるコントローラーです。
  */
-
 @RestController
 @RequestMapping("/api/students")
 @Validated
@@ -43,7 +41,39 @@ public class StudentRestController {
     @Operation(summary = "一覧取得", description = "受講生の一覧を取得します")
     @ApiResponse(responseCode = "200", description = "取得成功",
             content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = StudentDetail.class))))
+                    schema = @Schema(implementation = ApiResult.class),
+                    examples = @ExampleObject(name = "一覧取得成功例",
+                            value = """
+                                    {
+                                      "status": "success",
+                                      "message": "受講生一覧を取得しました",
+                                      "data": [
+                                        {
+                                          "student": {
+                                            "id": "1",
+                                            "name": "山田 太郎",
+                                            "furigana": "ヤマダ タロウ",
+                                            "nickname": "たろう",
+                                            "email": "yamada@example.com",
+                                            "area": "東京都",
+                                            "age": 25,
+                                            "gender": "男性",
+                                            "remarks": "備考",
+                                            "deleted": false
+                                          },
+                                          "studentCourseList": [
+                                            {
+                                              "id": "1",
+                                              "studentId": "1",
+                                              "courseName": "Javaコース",
+                                              "courseStartAt": "2026-04-01T00:00:00",
+                                              "courseEndAt": "2027-03-31T00:00:00"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                    """)))
     @GetMapping
     public ResponseEntity<ApiResult<List<StudentDetail>>> getStudentList() {
         List<StudentDetail> studentList = service.searchStudentList();
@@ -55,6 +85,7 @@ public class StudentRestController {
                 )
         );
     }
+
     /**
      * 指定した受講生IDに紐づく受講生詳細を取得します。
      *
@@ -65,52 +96,59 @@ public class StudentRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "取得成功",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = StudentDetail.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "詳細取得成功例",
                                     value = """
                                             {
-                                              "student": {
-                                                "id": "1",
-                                                "name": "山田 太郎",
-                                                "furigana": "ヤマダ タロウ",
-                                                "nickname": "たろう",
-                                                "email": "yamada@example.com",
-                                                "area": "東京都",
-                                                "age": 25,
-                                                "gender": "男性",
-                                                "remarks": "備考",
-                                                "deleted": false
-                                              },
-                                              "studentCourseList":[{
+                                              "status": "success",
+                                              "message": "受講生詳細を取得しました",
+                                              "data": {
+                                                "student": {
                                                   "id": "1",
-                                                  "studentId": "1",
-                                                  "courseName": "Javaコース",
-                                                  "courseStartAt": "2026-04-01T00:00:00",
-                                                  "courseEndAt": "2027-03-31T00:00:00"
-                                                }
+                                                  "name": "山田 太郎",
+                                                  "furigana": "ヤマダ タロウ",
+                                                  "nickname": "たろう",
+                                                  "email": "yamada@example.com",
+                                                  "area": "東京都",
+                                                  "age": 25,
+                                                  "gender": "男性",
+                                                  "remarks": "備考",
+                                                  "deleted": false
+                                                },
+                                                "studentCourseList": [
+                                                  {
+                                                    "id": "1",
+                                                    "studentId": "1",
+                                                    "courseName": "Javaコース",
+                                                    "courseStartAt": "2026-04-01T00:00:00",
+                                                    "courseEndAt": "2027-03-31T00:00:00"
+                                                  }
                                                 ]
+                                              }
                                             }
-                                            """
-                            )
+                                            """)
                     )
             ),
             @ApiResponse(responseCode = "400", description = "IDの形式が不正です",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
-                            examples = @ExampleObject(name = "ID形式不正エラー一例",
+                            schema = @Schema(implementation = ApiResult.class),
+                            examples = @ExampleObject(name = "ID形式不正エラー例",
                                     value = """
                                             {
-                                                "message": "IDは数字で入力してください"
+                                              "status": "error",
+                                              "message": "IDは数字で入力してください",
+                                              "data": null
                                             }
-                                            """
-                            ))),
+                                            """))),
             @ApiResponse(responseCode = "404", description = "指定した受講生が存在しません",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "受講生未検出エラー例",
                                     value = """
                                             {
-                                                "message": "受講生ID：999 が見つかりません。"
+                                              "status": "error",
+                                              "message": "受講生ID：999 が見つかりません。",
+                                              "data": null
                                             }
                                             """)
                     )
@@ -139,34 +177,41 @@ public class StudentRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "登録成功",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResultMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "登録成功例",
                                     value = """
                                             {
+                                              "status": "success",
                                               "message": "登録処理が成功しました",
-                                              "studentId": "1"
+                                              "data": {
+                                                "studentId": "1"
+                                              }
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "400", description = "不正な入力値",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
-                            examples = @ExampleObject(name = "不正入力時のエラーメッセージ一例",
+                            schema = @Schema(implementation = ApiResult.class),
+                            examples = @ExampleObject(name = "不正入力時のエラーメッセージ例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です"
+                                              "status": "error",
+                                              "message": "student.name: 名前は必須です",
+                                              "data": null
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "409", description = "メールアドレスの重複",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "重複したメールアドレス登録時",
                                     value = """
                                             {
-                                                "message": "tani@example.com はすでに使われているメールアドレスです"
+                                              "status": "error",
+                                              "message": "tani@example.com はすでに使われているメールアドレスです",
+                                              "data": null
                                             }
                                             """)
                     )
@@ -196,40 +241,60 @@ public class StudentRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "更新成功",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResultMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "更新成功例",
                                     value = """
                                             {
+                                              "status": "success",
                                               "message": "受講生情報を更新しました",
-                                              "studentId": "1"
+                                              "data": {
+                                                "studentId": "1"
+                                              }
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "400", description = "不正な入力値",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です"
+                                              "status": "error",
+                                              "message": "student.name: 名前は必須です",
+                                              "data": null
                                             }
                                             """)
                     )
             ),
-
             @ApiResponse(responseCode = "404", description = "指定した受講生が存在しません",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "受講生未検出エラー例",
                                     value = """
                                             {
-                                                "message": "受講生ID：999 が見つかりません。"
+                                              "status": "error",
+                                              "message": "受講生ID：999 が見つかりません。",
+                                              "data": null
                                             }
                                             """)
                     )
             )
     })
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResult<StudentIdResponse>> updateStudent(
+            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id,
+            @Valid @RequestBody StudentDetail studentDetail) {
+        studentDetail.getStudent().setId(id);
+        service.updateStudent(studentDetail);
+        return ResponseEntity.ok(
+                new ApiResult<>(
+                        "success",
+                        "受講生情報を更新しました",
+                        new StudentIdResponse(id)
+                )
+        );
+    }
 
     /**
      * 指定したIDの受講生情報を論理削除します。
@@ -241,37 +306,46 @@ public class StudentRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "論理削除",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResultMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "論理削除成功例",
                                     value = """
                                             {
-                                                "message": "受講生を論理削除しました",
+                                              "status": "success",
+                                              "message": "受講生を論理削除しました",
+                                              "data": {
                                                 "studentId": "1"
+                                              }
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "404", description = "指定した受講生が存在しません",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "受講生未検出例",
                                     value = """
                                             {
-                                                "message": "受講生ID：999 が見つかりません。"
+                                              "status": "error",
+                                              "message": "受講生ID：999 が見つかりません。",
+                                              "data": null
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "409", description = "すでに削除済み",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "すでに論理削除済みの場合",
                                     value = """
                                             {
-                                                "message": "受講生ID：1 はすでに論理削除済みです。"
+                                              "status": "error",
+                                              "message": "受講生ID：1 はすでに論理削除済みです。",
+                                              "data": null
                                             }
                                             """)
-                    ))})
+                    )
+            )
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResult<StudentIdResponse>> deleteStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
@@ -284,7 +358,6 @@ public class StudentRestController {
                 )
         );
     }
-
     /**
      * 指定したIDの受講生情報を復元します。
      *
@@ -295,37 +368,46 @@ public class StudentRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "復元処理成功",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ResultMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "復元処理成功例",
                                     value = """
                                             {
-                                                "message": "受講生情報を復元しました",
+                                              "status": "success",
+                                              "message": "受講生情報を復元しました",
+                                              "data": {
                                                 "studentId": "1"
+                                              }
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "404", description = "指定した受講生が存在しません",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "受講生未検出例",
                                     value = """
                                             {
-                                                "message": "受講生ID：999 が見つかりません。"
+                                              "status": "error",
+                                              "message": "受講生ID：999 が見つかりません。",
+                                              "data": null
                                             }
                                             """)
                     )
             ),
             @ApiResponse(responseCode = "409", description = "すでに復元済み",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorMessage.class),
+                            schema = @Schema(implementation = ApiResult.class),
                             examples = @ExampleObject(name = "すでに復元済みの場合",
                                     value = """
                                             {
-                                                "message": "受講生ID：1 はすでに有効状態のため復元できません。"
+                                              "status": "error",
+                                              "message": "受講生ID：1 はすでに有効状態のため復元できません。",
+                                              "data": null
                                             }
                                             """)
-                    ))})
+                    )
+            )
+    })
     @PatchMapping("/{id}/restore")
     public ResponseEntity<ApiResult<StudentIdResponse>> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
