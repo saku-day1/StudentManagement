@@ -143,7 +143,7 @@ public class StudentRestController {
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ一例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です
+                                              "message": "student.name: 名前は必須です"
                                             }
                                             """)
                     )
@@ -197,7 +197,7 @@ public class StudentRestController {
                             examples = @ExampleObject(name = "不正入力時のエラーメッセージ例",
                                     value = """
                                             {
-                                              "message": "student.name: 名前は必須です
+                                              "message": "student.name: 名前は必須です"
                                             }
                                             """)
                     )
@@ -313,7 +313,7 @@ public class StudentRestController {
                                             }
                                             """)
                     ))})
-    @PutMapping("/{id}/restore")
+    @PatchMapping("/{id}/restore")
     public ResponseEntity<ResultMessage> restoreStudent(
             @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください") String id) {
         service.restoreStudent(id);
