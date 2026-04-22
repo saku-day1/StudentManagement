@@ -66,7 +66,7 @@ class StudentRepositoryTest {
     void 受講生IDに紐づいたコース情報の詳細検索が行えること() {
         //repositoryからID情報1のコース情報を取得
         List<StudentCourse> actual = sut.searchStudentCourse("1");
-        StudentCourse studentCourse = actual.getFirst();
+        StudentCourse studentCourse = actual.get(0);
         assertThat(actual).hasSize(1);
         assertThat(studentCourse.getStudentId()).isEqualTo("1");
         assertThat(studentCourse.getCourseName()).isEqualTo("Javaコース");
@@ -96,13 +96,14 @@ class StudentRepositoryTest {
         List<Student> actual = sut.search();
         assertThat(actual).hasSize(6);
     }
+
     @Test
-    void 受講生コースの登録処理が行えること(){
+    void 受講生コースの登録処理が行えること() {
         StudentCourse studentCourse = new StudentCourse();
         studentCourse.setStudentId("1");
         studentCourse.setCourseName("Javaコース");
-        studentCourse.setCourseStartAt(LocalDateTime.of(2026,4,22,0,0));
-        studentCourse.setCourseEndAt(LocalDateTime.of(2027,4,22,0,0));
+        studentCourse.setCourseStartAt(LocalDateTime.of(2026, 4, 22, 0, 0));
+        studentCourse.setCourseEndAt(LocalDateTime.of(2027, 4, 22, 0, 0));
         sut.registerStudentCourse(studentCourse);
         List<StudentCourse> actual = sut.searchStudentCourseList();
         assertThat(actual).hasSize(6);
@@ -128,15 +129,16 @@ class StudentRepositoryTest {
         assertThat(after.getName()).isEqualTo("山田 真一");
         assertThat(after.getEmail()).isEqualTo("taro.yamada@example.com");
     }
+
     @Test
-    void コース情報の更新処理が行えること(){
-        List<StudentCourse> courseList =sut.searchStudentCourse("1");
-        StudentCourse course = courseList.getFirst();
+    void コース情報の更新処理が行えること() {
+        List<StudentCourse> courseList = sut.searchStudentCourse("1");
+        StudentCourse course = courseList.get(0);
         assertThat(course.getCourseName()).isNotEqualTo("AWSコース");
         course.setCourseName("AWSコース");
         sut.updateStudentCourse(course);
 
-        StudentCourse updated = sut.searchStudentCourse("1").getFirst();
+        StudentCourse updated = sut.searchStudentCourse("1").get(0);
         assertThat(updated.getStudentId()).isEqualTo("1");
         assertThat(updated.getCourseName()).isEqualTo("AWSコース");
     }
@@ -173,13 +175,15 @@ class StudentRepositoryTest {
         assertThat(restored.getName()).isEqualTo("山田 太郎");
         assertThat(restored.isDeleted()).isFalse();
     }
+
     @Test
-    void 登録されているメールアドレスの確認ができること(){
+    void 登録されているメールアドレスの確認ができること() {
         int actual = sut.countByEmail("taro.yamada@example.com");
         assertThat(actual).isEqualTo(1);
     }
+
     @Test
-    void 登録されていないメールアドレスの件数が0件であること(){
+    void 登録されていないメールアドレスの件数が0件であること() {
         int actual = sut.countByEmail("test@example.com");
         assertThat(actual).isEqualTo(0);
     }
