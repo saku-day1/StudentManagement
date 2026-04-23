@@ -154,6 +154,35 @@ public class StudentService {
         }
         repository.restoreStudent(id);
     }
+
+    /**
+     * 受講生コース情報IDに基づいて申込状況を新規作成します
+     * @param studentCourseId　受講生コース情報ID
+     * @throws StudentCourseNotFoundException 指定した受講生コース情報IDが存在しない場合
+     * @throws StudentAlreadyAppliedException すでに申し込まれている場合
+     */
+    public void createApplicationStatus(String studentCourseId) {
+        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        // 受講生コース情報の存在チェック
+        // なければ例外
+        if (studentCourse == null) {
+            throw new StudentCourseNotFoundException(studentCourseId);
+        }
+        // すでに申込状況が存在するかチェック
+        // あれば例外
+        ApplicationStatus existing =
+                repository.searchApplicationStatusByStudentCourseId(studentCourseId);
+        if (existing != null) {
+            throw new StudentAlreadyAppliedException(studentCourseId);
+        }
+        // 申込状況オブジェクト生成
+        // status = 仮申込
+        ApplicationStatus applicationStatus = new ApplicationStatus();
+        applicationStatus.setStudentCourseId(studentCourseId);
+        applicationStatus.setStatus("仮申込");
+        // 保存
+        repository.createApplicationsStatus(applicationStatus);
+    }
 }
 
 
