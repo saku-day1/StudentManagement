@@ -6,6 +6,7 @@ package raisetech.StudentManagement.exception;
 public class ApplicationStatusNotFoundException extends RuntimeException {
     /**
      * 例外メッセージを指定して例外を生成します
+     *
      * @param studentCourseId 受講生コースID
      */
     public ApplicationStatusNotFoundException(String studentCourseId) {

@@ -6,6 +6,7 @@ package raisetech.StudentManagement.exception;
 public class StudentAlreadyDeletedException extends RuntimeException {
     /**
      * 例外メッセージを指定して例外を作成します。
+     *
      * @param id 受講生ID
      */
     public StudentAlreadyDeletedException(String id) {

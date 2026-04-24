@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import raisetech.StudentManagement.dto.ApiResult;
-import raisetech.StudentManagement.exception.DuplicateEmailException;
-import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
-import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
-import raisetech.StudentManagement.exception.StudentNotFoundException;
+import raisetech.StudentManagement.exception.*;
 
+import javax.management.InvalidApplicationException;
 import java.util.stream.Collectors;
 
 /**
@@ -172,6 +170,89 @@ public class GlobalExceptionHandler {
                 .body(buildErrorResponse(e.getMessage()));
     }
 
+    /**
+     * 受講生コースIDが見つからない場合の例外を処理し、
+     * 404 Not Found のレスポンスを返却します。
+     *
+     * @param e 受講生コースIDが見つからない場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(StudentCourseNotFoundException.class)
+    public ResponseEntity<ApiResult<Void>> handleStudentCourseNotFoundException(
+            StudentCourseNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * 申込状況が見つからない場合の例外を処理し、
+     * 404 Not Found のレスポンスを返却します。
+     *
+     * @param e 申込状況が見つからない場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(ApplicationStatusNotFoundException.class)
+    public ResponseEntity<ApiResult<Void>> handleApplicationStatusNotFoundException(
+            ApplicationStatusNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * 申込内容が不正な場合の例外を処理し、
+     * 409 Conflict レスポンスを返却します。
+     *
+     * @param e 申込内容が不正の場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(InvalidApplicationException.class)
+    public ResponseEntity<ApiResult<Void>> handleInvalidApplicationException(
+            InvalidApplicationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * すでに申し込まれている場合の例外を処理し、
+     * 409 Conflict レスポンスを返却します。
+     *
+     * @param e 申し込まれている場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(StudentAlreadyAppliedException.class)
+    public ResponseEntity<ApiResult<Void>> handleStudentAlreadyAppliedException(
+            StudentAlreadyAppliedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * 申込状況がすでに論理削除されている場合の例外を処理し、
+     * 409 Conflict のレスポンスを返却します。
+     *
+     * @param e 申込状況がすでに論理削除されている場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(ApplicationStatusAlreadyDeletedException.class)
+    public ResponseEntity<ApiResult<Void>> handleApplicationStatusAlreadyDeletedException(
+            ApplicationStatusAlreadyDeletedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * 申込状況がすでに有効状態に復元処理を行おうとした場合の例外を処理し、
+     * 409 Conflict のレスポンスを返却します。
+     *
+     * @param e 申込状況がすでに有効状態の場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(ApplicationStatusAlreadyActiveException.class)
+    public ResponseEntity<ApiResult<Void>> handleApplicationStatusAlreadyActiveException(
+            ApplicationStatusAlreadyActiveException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
+    }
     /**
      * 統一形式のエラーレスポンスを生成します。
      *

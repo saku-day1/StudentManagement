@@ -7,6 +7,7 @@ public class DuplicateEmailException extends RuntimeException {
 
     /**
      * 例外メッセージを指定して例外を生成します。
+     *
      * @param message 例外メッセージ
      */
     public DuplicateEmailException(String message) {
