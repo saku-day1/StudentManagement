@@ -163,44 +163,41 @@ public class StudentService {
      * @throws StudentAlreadyAppliedException すでに申し込まれている場合
      */
     public void createApplicationStatus(String studentCourseId) {
-        // 受講生コース情報の存在チェック
-        // なければ例外
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        // すでに申込状況が存在するかチェック
-        // あれば例外
         ApplicationStatus existing =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (existing != null) {
             throw new StudentAlreadyAppliedException(studentCourseId);
         }
-        // 申込状況オブジェクト生成
-        // status = 仮申込
         ApplicationStatus applicationStatus = new ApplicationStatus();
         applicationStatus.setStudentCourseId(studentCourseId);
         applicationStatus.setStatus(ApplicationStatusType.PROVISIONAL.getLabel());
-        // 保存
-        repository.createApplicationsStatus(applicationStatus);
+        repository.createApplicationStatus(applicationStatus);
     }
+
+    /**
+     * 受講生コース情報に基づいて申込状況を確定します
+     *
+     * @param studentCourseId 受講生コース情報ID
+     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws InvalidApplicationException        仮申込状態以外のステータスである場合
+     */
 
     //受講生コース情報IDに基づいて申込状況を確定します
     public void confirmApplicationStatus(String studentCourseId) {
-        //受講生コース情報の存在チェック
-        //なければ例外
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        //申込状況のチェック
-        //なければ例外
         ApplicationStatus applicationStatus =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (applicationStatus == null) {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
-        // 仮申込状態でなければ例外
         if (!ApplicationStatusType.PROVISIONAL.getLabel().equals(applicationStatus.getStatus())) {
             throw new InvalidApplicationException(studentCourseId);
         }
@@ -209,96 +206,107 @@ public class StudentService {
         repository.updateApplicationStatus(applicationStatus);
     }
 
-    //受講生コース情報IDに基づいて受講開始処理を行います
+    /**
+     * 受講生コース情報に基づいて受講開始処理を行います
+     *
+     * @param studentCourseId 受講生コース情報ID
+     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws InvalidApplicationException        本申込状態以外のステータスである場合
+     */
+
     public void startApplicationStatus(String studentCourseId) {
-        //受講生コース情報の存在チェック
-        //なければ例外
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        //申込状況のチェック
-        //なければ例外
         ApplicationStatus applicationStatus =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (applicationStatus == null) {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
-        //本申込でなければ例外
         if (!ApplicationStatusType.CONFIRMED.getLabel().equals(applicationStatus.getStatus())) {
             throw new InvalidApplicationException(studentCourseId);
         }
         applicationStatus.setStatus(ApplicationStatusType.ACTIVE.getLabel());
-
         repository.updateApplicationStatus(applicationStatus);
     }
 
-    //受講生コース情報IDに基づいて受講終了処理を行います
+    /**
+     * 受講生コース情報に基づいて受講完了処理を行います
+     *
+     * @param studentCourseId 受講生コース情報ID
+     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws InvalidApplicationException        受講中以外のステータスである場合
+     */
     public void completeApplicationStatus(String studentCourseId) {
-        //受講生コース情報の存在チェック
-        //なければ例外
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        //申込状況のチェック
-        //なければ例外
         ApplicationStatus applicationStatus =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (applicationStatus == null) {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
-        //受講中でなければ例外
         if (!ApplicationStatusType.ACTIVE.getLabel().equals(applicationStatus.getStatus())) {
             throw new InvalidApplicationException(studentCourseId);
         }
         applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
-
         repository.updateApplicationStatus(applicationStatus);
     }
 
-    //受講生コース情報IDに基づいて申込状況の論理削除処理を行います。
+    /**
+     * 受講生コース情報に基づいて申込状況の論理削除を行います
+     *
+     * @param studentCourseId 受講生コース情報ID
+     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws ApplicationStatusAlreadyDeletedException すでに論理削除されている場合
+     * @throws InvalidApplicationException        完了以外のステータスである場合
+     */
     public void deleteApplicationStatus(String studentCourseId) {
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        //申込状況のチェック
-        //なければ例外
         ApplicationStatus applicationStatus =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (applicationStatus == null) {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
-        //すでに論理削除済みであれば例外
         if (applicationStatus.isDeleted()) {
             throw new ApplicationStatusAlreadyDeletedException(studentCourseId);
         }
-        //終了でなければ例外
         if (!ApplicationStatusType.COMPLETED.getLabel().equals(applicationStatus.getStatus())) {
             throw new InvalidApplicationException(studentCourseId);
         }
         repository.logicalDeleteApplicationStatus(applicationStatus);
     }
 
-    //受講生コース情報IDに基づいて申込状況の復元処理を行います。
+    /**
+     * 受講生コース情報に基づいて申込状況の復元を行います
+     *
+     * @param studentCourseId 受講生コース情報ID
+     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws ApplicationStatusAlreadyDeletedException すでにステータスが有効の場合
+     * @throws InvalidApplicationException        完了以外のステータスである場合
+     */
     public void restoreApplicationStatus(String studentCourseId) {
-        StudentCourse studentCourse = repository.searchStudentCourse(studentCourseId);
+        StudentCourse studentCourse = repository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
-        //申込状況のチェック
-        //なければ例外
         ApplicationStatus applicationStatus =
                 repository.searchApplicationStatusByStudentCourseId(studentCourseId);
         if (applicationStatus == null) {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
-        //論理削除されていない場合は例外
         if (!applicationStatus.isDeleted()) {
             throw new ApplicationStatusAlreadyActiveException(studentCourseId);
         }
-        //終了でなければ例外
         if (!ApplicationStatusType.COMPLETED.getLabel().equals(applicationStatus.getStatus())) {
             throw new InvalidApplicationException(studentCourseId);
         }
