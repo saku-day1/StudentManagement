@@ -1,10 +1,13 @@
 package raisetech.StudentManagement.data;
 
+import lombok.Getter;
+
 /**
  * 申込状況の状態を表すenum。
  * 仮申込から本申込、受講中、終了までのステータスの変化を管理する。
  * labelで日本語の表示名を取得する。
  */
+@Getter
 public enum ApplicationStatusType {
     PROVISIONAL("仮申込"),
     CONFIRMED("本申込"),
@@ -17,9 +20,7 @@ public enum ApplicationStatusType {
     ApplicationStatusType(String label){
         this.label = label;
     }
-    public String getLabel(){
-        return label;
-    }
+
     public boolean canConfirm(){
         return this == PROVISIONAL;
     }
@@ -31,9 +32,9 @@ public enum ApplicationStatusType {
         return this == ACTIVE;
     }
 
-    public boolean canDelete(){return this == COMPLETED;}
+    public boolean canArchive(){return this == COMPLETED;}
 
-    public boolean canRestore(){return this == COMPLETED;}
+    public boolean isCancelable() {return this == PROVISIONAL || this == CONFIRMED;}
 
     public static ApplicationStatusType fromLabel(String label){
         for (ApplicationStatusType type : ApplicationStatusType.values()){
