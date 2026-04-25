@@ -125,16 +125,10 @@ public interface StudentRepository {
     void updateApplicationStatus(ApplicationStatus applicationStatus);
 
     /**
-     * 完了済みの申込状況を論理削除します。
+     * 申込状況を論理削除します。
      * @param applicationStatus 申込状況
      */
     void logicalDeleteApplicationStatus(ApplicationStatus applicationStatus);
-
-    /**
-     * 論理削除した申込状況を復元します。
-     * @param applicationStatus 申込状況
-     */
-    void logicalRestoreApplicationStatus(ApplicationStatus applicationStatus);
 }
 
 
