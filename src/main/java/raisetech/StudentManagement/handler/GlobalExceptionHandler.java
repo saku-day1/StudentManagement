@@ -239,20 +239,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(buildErrorResponse(e.getMessage()));
     }
-
-    /**
-     * 申込状況がすでに有効状態に復元処理を行おうとした場合の例外を処理し、
-     * 409 Conflict のレスポンスを返却します。
-     *
-     * @param e 申込状況がすでに有効状態の場合の例外
-     * @return エラーメッセージを含むレスポンス
-     */
-    @ExceptionHandler(ApplicationStatusAlreadyActiveException.class)
-    public ResponseEntity<ApiResult<Void>> handleApplicationStatusAlreadyActiveException(
-            ApplicationStatusAlreadyActiveException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(buildErrorResponse(e.getMessage()));
-    }
     /**
      * 統一形式のエラーレスポンスを生成します。
      *
