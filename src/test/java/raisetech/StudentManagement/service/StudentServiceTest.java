@@ -1,5 +1,6 @@
 package raisetech.StudentManagement.service;
 
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,13 +8,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
+import raisetech.StudentManagement.data.ApplicationStatus;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.exception.DuplicateEmailException;
-import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
-import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
-import raisetech.StudentManagement.exception.StudentNotFoundException;
+import raisetech.StudentManagement.exception.*;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 import java.util.ArrayList;
@@ -339,4 +338,66 @@ class StudentServiceTest {
         verify(repository, never()).restoreStudent("1");
         verify(repository).searchStudent("1");
     }
+
+    @Test
+    void 申込処理_申込状況の新規作成が適切に行われること() {
+        //準備
+        String studentCourseId = "1";
+        StudentCourse studentCourse = createStudentCourse(studentCourseId);
+
+        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
+        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
+
+        //実行
+        sut.createApplicationStatus(studentCourseId);
+        ArgumentCaptor<ApplicationStatus> captor = ArgumentCaptor.forClass(ApplicationStatus.class);
+        verify(repository, times(1)).createApplicationStatus(captor.capture());
+        ApplicationStatus capturedStatus = captor.getValue();
+        //検証
+        assertEquals(studentCourseId, capturedStatus.getStudentCourseId());
+        assertEquals("仮申込", capturedStatus.getStatus());
+        //確認
+        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+    }
+
+    @Nonnull
+    private static StudentCourse createStudentCourse(String studentCourseId) {
+        StudentCourse studentCourse = new StudentCourse();
+        studentCourse.setId(studentCourseId);
+        return studentCourse;
+    }
+
+    @Test
+    void 申込処理_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
+        //準備
+        String studentCourseId = "999";
+        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
+        //実行・検証
+        assertThrows(StudentCourseNotFoundException.class, () -> sut.createApplicationStatus(studentCourseId));
+
+        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
+        verify(repository, never()).createApplicationStatus(any());
+    }
+
+    @Test
+    void 申込処理_申込状況がすでに存在する場合に例外処理が適切に行われること() {
+        //準備
+        String studentCourseId = "1";
+        StudentCourse studentCourse = createStudentCourse(studentCourseId);
+        ApplicationStatus existingApplicationStatus = new ApplicationStatus();
+        existingApplicationStatus.setStudentCourseId(studentCourseId);
+        //実行・検証
+        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId))
+                .thenReturn(existingApplicationStatus);
+        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
+
+        assertThrows(StudentAlreadyAppliedException.class,
+                () -> sut.createApplicationStatus(studentCourseId));
+        verify(repository,times(1)).searchStudentCourseById(studentCourseId);
+        verify(repository,times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+        verify(repository,never()).createApplicationStatus(any());
+    }
+
 }
