@@ -11,6 +11,7 @@ public enum ApplicationStatusType {
     ACTIVE("受講中"),
     COMPLETED("終了");
 
+
     private final String label;
 
     ApplicationStatusType(String label){
@@ -19,4 +20,27 @@ public enum ApplicationStatusType {
     public String getLabel(){
         return label;
     }
+    public boolean canConfirm(){
+        return this == PROVISIONAL;
+    }
+    public boolean canStart(){
+        return this == CONFIRMED;
+    }
+
+    public boolean canComplete(){
+        return this == ACTIVE;
+    }
+
+    public boolean canDelete(){return this == COMPLETED;}
+
+    public boolean canRestore(){return this == COMPLETED;}
+
+    public static ApplicationStatusType fromLabel(String label){
+        for (ApplicationStatusType type : ApplicationStatusType.values()){
+            if (type.getLabel().equals(label)){
+                return type;
+            }
+        }throw new IllegalArgumentException("不正な申込状況です: " + label);
+    }
+
 }
