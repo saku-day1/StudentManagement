@@ -36,7 +36,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 検索処理_申込状況の検索が適切に行われること(){
+    void 検索処理_申込状況の検索が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -49,8 +49,9 @@ class ApplicationStatusServiceTest {
 
         assertEquals(applicationStatus, actual);
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(applicationStatusRepository,times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+        verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
     }
+
     @Test
     void 検索処理_申込状況が存在しない場合に例外処理が適切に行われること() {
         String studentCourseId = "1";
@@ -65,17 +66,18 @@ class ApplicationStatusServiceTest {
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
     }
+
     @Test
-    void 検索処理_受講生コースID情報が存在しない場合に例外処理が適切に行われること(){
+    void 検索処理_受講生コースID情報が存在しない場合に例外処理が適切に行われること() {
         String studentCourseId = "999";
 
         when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(null);
 
-        assertThrows(StudentCourseNotFoundException.class ,
+        assertThrows(StudentCourseNotFoundException.class,
                 () -> sut.searchApplicationStatus(studentCourseId));
 
-        verify(studentRepository,times(1)).searchStudentCourseById(studentCourseId);
-        verify(applicationStatusRepository,never()).searchApplicationStatusByStudentCourseId(any());
+        verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(applicationStatusRepository, never()).searchApplicationStatusByStudentCourseId(any());
     }
 
 
@@ -185,6 +187,24 @@ class ApplicationStatusServiceTest {
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
         verify(applicationStatusRepository, never()).updateApplicationStatus(any());
     }
+    @Test
+    void 本申込処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+        String studentCourseId = "1";
+        StudentCourse studentCourse = createStudentCourse(studentCourseId);
+        ApplicationStatus applicationStatus = new ApplicationStatus();
+        applicationStatus.setStudentCourseId(studentCourseId);
+        applicationStatus.setStatus(ApplicationStatusType.PROVISIONAL.getLabel());
+        applicationStatus.setDeleted(true);
+
+        when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
+        when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
+
+        assertThrows(ApplicationStatusAlreadyDeletedException.class, () -> sut.confirmApplicationStatus(studentCourseId));
+
+        verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+        verify(applicationStatusRepository, never()).updateApplicationStatus(any());
+    }
 
     @Test
     void 本申込処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
@@ -233,6 +253,24 @@ class ApplicationStatusServiceTest {
         when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
 
         assertThrows(InvalidApplicationException.class, () -> sut.startApplicationStatus(studentCourseId));
+
+        verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+        verify(applicationStatusRepository, never()).updateApplicationStatus(any());
+    }
+    @Test
+    void 受講開始処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+        String studentCourseId = "1";
+        StudentCourse studentCourse = createStudentCourse(studentCourseId);
+        ApplicationStatus applicationStatus = new ApplicationStatus();
+        applicationStatus.setStudentCourseId(studentCourseId);
+        applicationStatus.setStatus(ApplicationStatusType.CONFIRMED.getLabel());
+        applicationStatus.setDeleted(true);
+
+        when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
+        when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
+
+        assertThrows(ApplicationStatusAlreadyDeletedException.class, () -> sut.startApplicationStatus(studentCourseId));
 
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
@@ -302,6 +340,25 @@ class ApplicationStatusServiceTest {
         when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
 
         assertThrows(InvalidApplicationException.class, () -> sut.completeApplicationStatus(studentCourseId));
+
+        verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
+        verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
+        verify(applicationStatusRepository, never()).updateApplicationStatus(any());
+    }
+
+    @Test
+    void 受講完了処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+        String studentCourseId = "1";
+        StudentCourse studentCourse = createStudentCourse(studentCourseId);
+        ApplicationStatus applicationStatus = new ApplicationStatus();
+        applicationStatus.setStudentCourseId(studentCourseId);
+        applicationStatus.setStatus(ApplicationStatusType.ACTIVE.getLabel());
+        applicationStatus.setDeleted(true);
+
+        when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
+        when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
+
+        assertThrows(ApplicationStatusAlreadyDeletedException.class, () -> sut.completeApplicationStatus(studentCourseId));
 
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
@@ -519,6 +576,7 @@ class ApplicationStatusServiceTest {
         verify(applicationStatusRepository, never()).searchApplicationStatusByStudentCourseId(any());
         verify(applicationStatusRepository, never()).logicalDeleteApplicationStatus(any());
     }
+
     @ParameterizedTest
     @EnumSource(
             value = ApplicationStatusType.class,
@@ -538,13 +596,14 @@ class ApplicationStatusServiceTest {
 
         sut.restoreApplicationStatus(studentCourseId);
 
-        assertEquals(ApplicationStatusType.PROVISIONAL.getLabel(),applicationStatus.getStatus());
+        assertEquals(ApplicationStatusType.PROVISIONAL.getLabel(), applicationStatus.getStatus());
         assertFalse(applicationStatus.isDeleted());
 
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
         verify(applicationStatusRepository, times(1)).restoreApplicationStatus(applicationStatus);
     }
+
     @ParameterizedTest
     @EnumSource(
             value = ApplicationStatusType.class,

@@ -108,12 +108,20 @@ public class ApplicationStatusService {
     @Transactional
     public void startApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
-        ApplicationStatus applicationStatus
-                = findApplicationStatusOrThrow(studentCourseId);
-        ApplicationStatusType statusType
-                = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
+
+        ApplicationStatus applicationStatus =
+                findApplicationStatusOrThrow(studentCourseId);
+
+        validateApplicationStatusNotDeleted(applicationStatus, studentCourseId);
+
+        ApplicationStatusType statusType =
+                ApplicationStatusType.fromLabel(applicationStatus.getStatus());
+
         if (!statusType.canStart()) {
-            throw new InvalidApplicationException(studentCourseId, "本申込状態の場合のみ受講中へ変更できます。");
+            throw new InvalidApplicationException(
+                    studentCourseId,
+                    "本申込状態のみ受講中に変更できます。"
+            );
         }
         applicationStatus.setStatus(ApplicationStatusType.ACTIVE.getLabel());
         applicationStatusRepository.updateApplicationStatus(applicationStatus);
@@ -130,11 +138,17 @@ public class ApplicationStatusService {
     @Transactional
     public void completeApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
-        ApplicationStatus applicationStatus = findApplicationStatusOrThrow(studentCourseId);
+        ApplicationStatus applicationStatus
+                = findApplicationStatusOrThrow(studentCourseId);
+
+        validateApplicationStatusNotDeleted(applicationStatus, studentCourseId);
+
         ApplicationStatusType statusType
                 = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.canComplete()) {
-            throw new InvalidApplicationException(studentCourseId, "受講中のみ受講完了にできます。");
+            throw new InvalidApplicationException(
+                    studentCourseId,
+                    "受講中のみ受講完了にできます。");
         }
         applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
         applicationStatusRepository.updateApplicationStatus(applicationStatus);
@@ -157,7 +171,9 @@ public class ApplicationStatusService {
         ApplicationStatusType statusType =
                 ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.isCancelable()) {
-            throw new InvalidApplicationException(studentCourseId, "この申込状況はキャンセルできません。");
+            throw new InvalidApplicationException(
+                    studentCourseId,
+                    "この申込状況はキャンセルできません。");
         }
         applicationStatusRepository.logicalDeleteApplicationStatus(applicationStatus);
     }
@@ -180,7 +196,9 @@ public class ApplicationStatusService {
         validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
         ApplicationStatusType statusType = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.canArchive()) {
-            throw new InvalidApplicationException(studentCourseId, "受講完了状態のみ非表示化できます。");
+            throw new InvalidApplicationException(
+                    studentCourseId,
+                    "受講完了状態のみ非表示化できます。");
         }
         applicationStatusRepository.logicalDeleteApplicationStatus(applicationStatus);
     }
