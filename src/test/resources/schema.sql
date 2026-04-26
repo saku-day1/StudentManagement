@@ -19,3 +19,11 @@ CREATE TABLE IF NOT EXISTS students_courses (
     course_end_at TIMESTAMP NULL DEFAULT NULL,
     PRIMARY KEY (id)
     );
+
+CREATE TABLE IF NOT EXISTS application_statuses (
+    id INT NOT NULL AUTO_INCREMENT,
+    student_course_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (id)
+    );
