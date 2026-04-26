@@ -1,27 +1,25 @@
 package raisetech.StudentManagement.service;
 
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
-import raisetech.StudentManagement.data.ApplicationStatus;
-import raisetech.StudentManagement.data.ApplicationStatusType;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
-import raisetech.StudentManagement.exception.*;
+import raisetech.StudentManagement.exception.DuplicateEmailException;
+import raisetech.StudentManagement.exception.StudentAlreadyActiveException;
+import raisetech.StudentManagement.exception.StudentAlreadyDeletedException;
+import raisetech.StudentManagement.exception.StudentNotFoundException;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -173,7 +171,7 @@ class StudentServiceTest {
 
         sut.registerStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository).registerStudentCourse(captor.capture());
         StudentCourse capturedCourse = captor.getValue();
 
@@ -204,7 +202,7 @@ class StudentServiceTest {
 
         sut.registerStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository, times(2)).registerStudentCourse(captor.capture());
         List<StudentCourse> capturedCourses = captor.getAllValues();
 
@@ -239,7 +237,7 @@ class StudentServiceTest {
 
         sut.updateStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository, times(1)).updateStudent(student);
         verify(repository, times(1)).updateStudentCourse(captor.capture());
 
@@ -342,464 +340,4 @@ class StudentServiceTest {
         verify(repository).searchStudent("1");
     }
 
-    @Test
-    void 申込処理_申込状況の新規作成が適切に行われること() {
-        //準備
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        //実行
-        sut.createApplicationStatus(studentCourseId);
-        ArgumentCaptor<ApplicationStatus> captor = ArgumentCaptor.forClass(ApplicationStatus.class);
-        verify(repository, times(1)).createApplicationStatus(captor.capture());
-        ApplicationStatus capturedStatus = captor.getValue();
-        //検証
-        assertEquals(studentCourseId, capturedStatus.getStudentCourseId());
-        assertEquals("仮申込", capturedStatus.getStatus());
-        //確認
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-    }
-
-    @Nonnull
-    private static StudentCourse createStudentCourse(String studentCourseId) {
-        StudentCourse studentCourse = new StudentCourse();
-        studentCourse.setId(studentCourseId);
-        return studentCourse;
-    }
-
-    @Test
-    void 申込処理_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
-        //準備
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-        //実行・検証
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.createApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).createApplicationStatus(any());
-    }
-
-    @Test
-    void 申込処理_申込状況がすでに存在する場合に例外処理が適切に行われること() {
-        //準備
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus existingApplicationStatus = new ApplicationStatus();
-        existingApplicationStatus.setStudentCourseId(studentCourseId);
-        //実行・検証
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId))
-                .thenReturn(existingApplicationStatus);
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-
-        assertThrows(StudentAlreadyAppliedException.class,
-                () -> sut.createApplicationStatus(studentCourseId));
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).createApplicationStatus(any());
-    }
-
-    @Test
-    void 本申込処理_本申込処理が適切に行われること() {
-        //受講生コースID準備
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        //申込状況の準備
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        //仮申込状況で準備
-        applicationStatus.setStatus(ApplicationStatusType.PROVISIONAL.getLabel());
-        //検索処理の実行時の戻り値を設定
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-        //テスト対象の準備
-        sut.confirmApplicationStatus(studentCourseId);
-        ArgumentCaptor<ApplicationStatus> captor = ArgumentCaptor.forClass(ApplicationStatus.class);
-        verify(repository, times(1)).updateApplicationStatus(captor.capture());
-        ApplicationStatus capturedStatus = captor.getValue();
-
-        assertEquals(studentCourseId, capturedStatus.getStudentCourseId());
-        assertEquals(ApplicationStatusType.CONFIRMED.getLabel(), capturedStatus.getStatus());
-
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-    }
-
-    @Test
-    void 本申込処理_仮申込状況以外の場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-
-        applicationStatus.setStatus(ApplicationStatusType.CONFIRMED.getLabel());
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(InvalidApplicationException.class, () -> sut.confirmApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 本申込処理_申込状況が存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        assertThrows(ApplicationStatusNotFoundException.class,
-                () -> sut.confirmApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 本申込処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
-
-        //準備
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-        //実行・検証
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.confirmApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講開始処理_受講開始処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(ApplicationStatusType.CONFIRMED.getLabel());
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        sut.startApplicationStatus(studentCourseId);
-
-        ArgumentCaptor<ApplicationStatus> captor = ArgumentCaptor.forClass(ApplicationStatus.class);
-        verify(repository, times(1)).updateApplicationStatus(captor.capture());
-        ApplicationStatus capturedStatus = captor.getValue();
-
-        assertEquals(studentCourseId, capturedStatus.getStudentCourseId());
-        assertEquals(ApplicationStatusType.ACTIVE.getLabel(), capturedStatus.getStatus());
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-    }
-
-    @Test
-    void 受講開始処理_本申込以外の状態の場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-
-        applicationStatus.setStatus(ApplicationStatusType.ACTIVE.getLabel());
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(InvalidApplicationException.class, () -> sut.startApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講開始処理_申込状況が存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        assertThrows(ApplicationStatusNotFoundException.class,
-                () -> sut.startApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講開始処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.startApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講完了処理_受講完了処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(ApplicationStatusType.ACTIVE.getLabel());
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        sut.completeApplicationStatus(studentCourseId);
-
-        ArgumentCaptor<ApplicationStatus> captor = ArgumentCaptor.forClass(ApplicationStatus.class);
-        verify(repository, times(1)).updateApplicationStatus(captor.capture());
-        ApplicationStatus capturedStatus = captor.getValue();
-
-        assertEquals(studentCourseId, capturedStatus.getStudentCourseId());
-        assertEquals(ApplicationStatusType.COMPLETED.getLabel(), capturedStatus.getStatus());
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-    }
-
-    @Test
-    void 受講完了処理_受講中以外の状態の場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-
-        applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(InvalidApplicationException.class, () -> sut.completeApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講完了処理_申込状況が存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        assertThrows(ApplicationStatusNotFoundException.class,
-                () -> sut.completeApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @Test
-    void 受講完了処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.completeApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).updateApplicationStatus(any());
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-            value = ApplicationStatusType.class,
-            names = {"PROVISIONAL", "CONFIRMED"}
-    )
-    void 申込状況キャンセル_キャンセル可能な状態の場合にキャンセル処理が適切に行われること(ApplicationStatusType statusType) {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(statusType.getLabel());
-        applicationStatus.setDeleted(false);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        sut.cancelApplicationStatus(studentCourseId);
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, times(1)).logicalDeleteApplicationStatus(applicationStatus);
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-            value = ApplicationStatusType.class,
-            names = {"ACTIVE", "COMPLETED"}
-    )
-    void 申込状況キャンセル_キャンセル不可能な場合の例外処理が適切に行われること(ApplicationStatusType statusType) {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(statusType.getLabel());
-        applicationStatus.setDeleted(false);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(InvalidApplicationException.class, () -> sut.cancelApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 申込状況キャンセル_すでにキャンセル済みの場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(ApplicationStatusType.PROVISIONAL.getLabel());
-        applicationStatus.setDeleted(true);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(ApplicationStatusAlreadyDeletedException.class, () -> sut.cancelApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 申込状況キャンセル_申込状況が存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        assertThrows(ApplicationStatusNotFoundException.class,
-                () -> sut.cancelApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 申込状況キャンセル_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.cancelApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 完了状態の論理削除_受講完了した申込状況の論理削除が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
-        applicationStatus.setDeleted(false);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        sut.archiveCompletedApplicationStatus(studentCourseId);
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, times(1)).logicalDeleteApplicationStatus(applicationStatus);
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-            value = ApplicationStatusType.class,
-            names = {"COMPLETED"},
-            mode = EnumSource.Mode.EXCLUDE
-    )
-    void 完了状態の論理削除_完了状態以外で論理削除を行った時に例外処理が適切に行われること(ApplicationStatusType statusType) {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(statusType.getLabel());
-        applicationStatus.setDeleted(false);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(InvalidApplicationException.class, () -> sut.archiveCompletedApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 完了状態の論理削除_すでに論理削除済みの場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-        ApplicationStatus applicationStatus = new ApplicationStatus();
-        applicationStatus.setStudentCourseId(studentCourseId);
-        applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
-        applicationStatus.setDeleted(true);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(applicationStatus);
-
-        assertThrows(ApplicationStatusAlreadyDeletedException.class, () -> sut.archiveCompletedApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 完了状態の論理削除_申込状況が存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "1";
-        StudentCourse studentCourse = createStudentCourse(studentCourseId);
-
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
-        when(repository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
-
-        assertThrows(ApplicationStatusNotFoundException.class,
-                () -> sut.archiveCompletedApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
-
-    @Test
-    void 完了状態の論理削除_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
-        String studentCourseId = "999";
-        when(repository.searchStudentCourseById(studentCourseId)).thenReturn(null);
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.archiveCompletedApplicationStatus(studentCourseId));
-
-        verify(repository, times(1)).searchStudentCourseById(studentCourseId);
-        verify(repository, never()).searchApplicationStatusByStudentCourseId(any());
-        verify(repository, never()).logicalDeleteApplicationStatus(any());
-    }
 }
