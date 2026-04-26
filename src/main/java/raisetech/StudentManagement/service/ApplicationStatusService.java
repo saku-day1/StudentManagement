@@ -74,6 +74,7 @@ public class ApplicationStatusService {
      * @param studentCourseId 受講生コース情報ID
      * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
      * @throws ApplicationStatusNotFoundException 申込状況がない場合
+     * @throws ApplicationStatusAlreadyDeletedException　論理削除されている場合
      * @throws InvalidApplicationException        仮申込状態以外のステータスである場合
      */
     @Transactional
@@ -81,6 +82,9 @@ public class ApplicationStatusService {
         validateStudentCourseExists(studentCourseId);
         ApplicationStatus applicationStatus
                 = findApplicationStatusOrThrow(studentCourseId);
+
+        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
+
         ApplicationStatusType statusType
                 = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.canConfirm()) {
@@ -149,9 +153,7 @@ public class ApplicationStatusService {
     public void cancelApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
         ApplicationStatus applicationStatus = findApplicationStatusOrThrow(studentCourseId);
-        if (applicationStatus.isDeleted()) {
-            throw new ApplicationStatusAlreadyDeletedException(studentCourseId);
-        }
+        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
         ApplicationStatusType statusType =
                 ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.isCancelable()) {
@@ -175,9 +177,7 @@ public class ApplicationStatusService {
     public void archiveCompletedApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
         ApplicationStatus applicationStatus = findApplicationStatusOrThrow(studentCourseId);
-        if (applicationStatus.isDeleted()) {
-            throw new ApplicationStatusAlreadyDeletedException(studentCourseId);
-        }
+        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
         ApplicationStatusType statusType = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.canArchive()) {
             throw new InvalidApplicationException(studentCourseId, "受講完了状態のみ非表示化できます。");
@@ -219,7 +219,14 @@ public class ApplicationStatusService {
 
         applicationStatusRepository.restoreApplicationStatus(applicationStatus);
     }
-
+    /**
+     * 受講生コースIDに紐づく申込状況を取得します。
+     * 申込状況が存在しない場合は例外をスローします。
+     *
+     * @param studentCourseId 受講生コースID
+     * @return 受講生コースIDに紐づく申込状況
+     * @throws ApplicationStatusNotFoundException 申込状況が存在しない場合
+     */
     @Nonnull
     private ApplicationStatus findApplicationStatusOrThrow(String studentCourseId) {
         ApplicationStatus applicationStatus =
@@ -229,11 +236,30 @@ public class ApplicationStatusService {
         }
         return applicationStatus;
     }
-
+    /**
+     * 指定された受講生コースIDが存在することを確認します。
+     *
+     * @param studentCourseId 受講生コースID
+     * @throws StudentCourseNotFoundException 受講生コースIDが存在しない場合
+     */
     private void validateStudentCourseExists(String studentCourseId) {
         StudentCourse studentCourse = studentRepository.searchStudentCourseById(studentCourseId);
         if (studentCourse == null) {
             throw new StudentCourseNotFoundException(studentCourseId);
+        }
+    }
+    /**
+     * 申込状況が論理削除されていないことを確認します。
+     *
+     * @param applicationStatus 確認対象の申込状況
+     * @param studentCourseId 受講生コースID
+     * @throws ApplicationStatusAlreadyDeletedException 申込状況が論理削除されている場合
+     */
+    private void validateApplicationStatusNotDeleted(
+            ApplicationStatus applicationStatus,
+            String studentCourseId) {
+        if (applicationStatus.isDeleted()) {
+            throw new ApplicationStatusAlreadyDeletedException(studentCourseId);
         }
     }
 }
