@@ -13,7 +13,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import raisetech.StudentManagement.dto.ApiResult;
 import raisetech.StudentManagement.exception.*;
 
-import javax.management.InvalidApplicationException;
+import raisetech.StudentManagement.exception.InvalidApplicationException;
 import java.util.stream.Collectors;
 
 /**
@@ -236,6 +236,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationStatusAlreadyDeletedException.class)
     public ResponseEntity<ApiResult<Void>> handleApplicationStatusAlreadyDeletedException(
             ApplicationStatusAlreadyDeletedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorResponse(e.getMessage()));
+    }
+
+    /**
+     * 申込状況がすでに有効状態の場合の例外を処理し、
+     * 409 Conflict のレスポンスを返却します。
+     *
+     * @param e 申込状況がすでに復元されている場合の例外
+     * @return エラーメッセージを含むレスポンス
+     */
+    @ExceptionHandler(ApplicationStatusAlreadyActiveException.class)
+    public ResponseEntity<ApiResult<Void>> handleApplicationStatusAlreadyActiveException(
+            ApplicationStatusAlreadyActiveException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(buildErrorResponse(e.getMessage()));
     }
