@@ -36,7 +36,7 @@ public class StudentRestController {
     /**
      * 受講生詳細一覧を取得します。
      *
-     * @return 受講生詳細一覧
+     * @return 受講生詳細一覧およびステータスとメッセージ含むレスポンス
      */
     @Operation(summary = "一覧取得", description = "受講生の一覧を取得します")
     @ApiResponse(responseCode = "200", description = "取得成功",
@@ -90,7 +90,7 @@ public class StudentRestController {
      * 指定した受講生IDに紐づく受講生詳細を取得します。
      *
      * @param id 受講生ID
-     * @return 受講生詳細
+     * @return 受講生詳細及びステータスとメッセージを含むレスポンス
      */
     @Operation(summary = "詳細検索", description = "指定した受講生の詳細情報を取得します")
     @ApiResponses(value = {
@@ -420,4 +420,5 @@ public class StudentRestController {
                 )
         );
     }
+
 }
