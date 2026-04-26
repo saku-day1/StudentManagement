@@ -24,11 +24,15 @@ public class StudentService {
 
     private final StudentRepository repository;
     private final StudentConverter converter;
+    private final ApplicationStatusService applicationStatusService;
 
     @Autowired
-    public StudentService(StudentRepository repository, StudentConverter converter) {
+    public StudentService(StudentRepository repository,
+                          StudentConverter converter,
+                          ApplicationStatusService applicationStatusService) {
         this.repository = repository;
         this.converter = converter;
+        this.applicationStatusService = applicationStatusService;
     }
 
     /**
@@ -75,11 +79,14 @@ public class StudentService {
         if (repository.countByEmail(student.getEmail()) > 0) {
             throw new DuplicateEmailException(student.getEmail() + " はすでに使われているメールアドレスです");
         }
+
         repository.registerStudent(student);
 
         studentDetail.getStudentCourseList().forEach(studentCourse -> {
             initStudentsCourse(studentCourse, student);
             repository.registerStudentCourse(studentCourse);
+
+            applicationStatusService.createInitialApplicationStatus(studentCourse.getId());
         });
     }
 
