@@ -5,7 +5,7 @@ VALUES ('山田 太郎', 'ヤマダ タロウ', 'たろう', 'taro.yamada@exampl
        ('高橋 美咲', 'タカハシ ミサキ', 'みーちゃん', 'misaki.takahashi@example.com', '北海道', 22, '女性', '', 0),
        ('田中 恒一', 'タナカ コウイチ', 'こうちゃん', 'koichi.tanaka@example.com', '愛知県', 27, '男性', '', 0);
 
-INSERT INTO students_courses (student_id, course_name, course_start_at, course_end_at)
+INSERT INTO student_courses (student_id, course_name, course_start_at, course_end_at)
 VALUES (1, 'Javaコース', '2026-04-01 00:00:00', '2027-04-01 00:00:00'),
        (2, 'AWSコース', '2026-04-05 00:00:00', '2027-04-05 00:00:00'),
        (3, 'Webデザインコース', '2026-04-10 00:00:00', '2027-04-10 00:00:00'),

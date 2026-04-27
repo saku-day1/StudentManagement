@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS students
     id
 )
     );
-CREATE TABLE IF NOT EXISTS students_courses
+CREATE TABLE IF NOT EXISTS student_courses
 (
     id
     INT
