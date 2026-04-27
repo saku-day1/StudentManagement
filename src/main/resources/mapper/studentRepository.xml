@@ -16,17 +16,17 @@
 
     <!--コース情報の検索　-->
     <select id="searchStudentCourseList" resultType="raisetech.StudentManagement.data.StudentCourse">
-        SELECT * FROM student_courses
+        SELECT * FROM students_courses
     </select>
 
     <!--受講生IDに紐づいたコース情報の検索　-->
     <select id="searchStudentCourse" resultType="raisetech.StudentManagement.data.StudentCourse">
-        SELECT * FROM student_courses WHERE student_id = #{studentId}
+        SELECT * FROM students_courses WHERE student_id = #{studentId}
     </select>
 
     <!--受講生コースIDに基づいた受講生コースの検索　-->
     <select id="searchStudentCourseById" resultType="raisetech.StudentManagement.data.StudentCourse">
-        SELECT * FROM student_courses WHERE id = #{studentCourseId}
+        SELECT * FROM students_courses WHERE id = #{studentCourseId}
     </select>
 
     <!--受講生情報を新規登録　-->
@@ -43,7 +43,7 @@
             parameterType="raisetech.StudentManagement.data.StudentCourse"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO student_courses( student_id, course_name, course_start_at, course_end_at )
+        INSERT INTO students_courses( student_id, course_name, course_start_at, course_end_at )
         VALUES ( #{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt} )
     </insert>
 
@@ -59,7 +59,7 @@
     <!--受講生コース情報を更新　-->
     <update id="updateStudentCourse"
             parameterType="raisetech.StudentManagement.data.StudentCourse">
-        UPDATE student_courses
+        UPDATE students_courses
         SET course_name = #{courseName} WHERE id = #{id}
     </update>
 
