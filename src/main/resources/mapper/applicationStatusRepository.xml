@@ -5,7 +5,11 @@
     <!--受講生コースIDに基づいた申込状況を検索　-->
     <select id="searchApplicationStatusByStudentCourseId"
             resultType="raisetech.StudentManagement.data.ApplicationStatus">
-        SELECT id, student_course_id, status, is_deleted AS deleted, deleted_at
+        SELECT id,
+        student_course_id AS studentCourseId,
+        status,
+        is_deleted AS deleted,
+        deleted_at AS deletedAt
         FROM application_status
         WHERE student_course_id = #{studentCourseId}
     </select>
