@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.service;
 
 import jakarta.annotation.Nonnull;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.data.ApplicationStatus;
@@ -9,6 +10,8 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.exception.*;
 import raisetech.StudentManagement.repository.ApplicationStatusRepository;
 import raisetech.StudentManagement.repository.StudentRepository;
+
+import java.time.LocalDateTime;
 
 /**
  * 申込状況の検索、作成、状態変更、論理削除を扱うサービスクラスです。
@@ -43,14 +46,14 @@ public class ApplicationStatusService {
     }
 
     /**
-     * 受講生コース登録時に、申込状況を初期状態（仮申込）として作成します。
+     * 受講生コースIDに基づき申込状況を初期状態（仮申込）として作成します。
      *
      * @param studentCourseId 受講生コース情報ID
      * @throws StudentCourseNotFoundException 指定した受講生コース情報IDが存在しない場合
      * @throws StudentAlreadyAppliedException すでに申込状況が存在する場合
      */
     @Transactional
-    public void createInitialApplicationStatus(String studentCourseId) {
+    public void createApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
 
         ApplicationStatus existing =
@@ -253,6 +256,13 @@ public class ApplicationStatusService {
             throw new ApplicationStatusNotFoundException(studentCourseId);
         }
         return applicationStatus;
+    }
+
+    @Scheduled(cron = "0 0 3 * * *")
+    @Transactional
+    public void deleteOldDeletedApplicationStatuses() {
+        LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
+        applicationStatusRepository.deleteOldDeletedApplicationStatuses(threshold);
     }
     /**
      * 指定された受講生コースIDが存在することを確認します。

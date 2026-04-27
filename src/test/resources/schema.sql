@@ -1,29 +1,86 @@
-CREATE TABLE IF NOT EXISTS students (
-    id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    furigana VARCHAR(100) NOT NULL,
-    nickname VARCHAR(50) DEFAULT NULL,
-    email VARCHAR(255) NOT NULL,
-    area VARCHAR(100) DEFAULT NULL,
+CREATE TABLE IF NOT EXISTS students
+(
+    id
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT,
+    name
+    VARCHAR
+(
+    50
+) NOT NULL,
+    furigana VARCHAR
+(
+    100
+) NOT NULL,
+    nickname VARCHAR
+(
+    50
+) DEFAULT NULL,
+    email VARCHAR
+(
+    255
+) NOT NULL,
+    area VARCHAR
+(
+    100
+) DEFAULT NULL,
     age INT DEFAULT NULL,
-    gender VARCHAR(50) DEFAULT NULL,
-    remarks VARCHAR(255) DEFAULT NULL,
+    gender VARCHAR
+(
+    50
+) DEFAULT NULL,
+    remarks VARCHAR
+(
+    255
+) DEFAULT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (id)
+    PRIMARY KEY
+(
+    id
+)
     );
-CREATE TABLE IF NOT EXISTS students_courses (
-    id INT NOT NULL AUTO_INCREMENT,
-    student_id INT NOT NULL,
-    course_name VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS students_courses
+(
+    id
+    INT
+    NOT
+    NULL
+    AUTO_INCREMENT,
+    student_id
+    INT
+    NOT
+    NULL,
+    course_name
+    VARCHAR
+(
+    100
+) NOT NULL,
     course_start_at TIMESTAMP NULL DEFAULT NULL,
     course_end_at TIMESTAMP NULL DEFAULT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY
+(
+    id
+)
     );
 
-CREATE TABLE IF NOT EXISTS application_statuses (
-    id INT NOT NULL AUTO_INCREMENT,
-    student_course_id INT NOT NULL,
-    status VARCHAR(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS application_status
+(
+    id
+    INT
+    AUTO_INCREMENT
+    PRIMARY
+    KEY,
+    student_course_id
+    INT
+    NOT
+    NULL,
+    status
+    VARCHAR
+(
+    20
+) NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (id)
+    deleted_at TIMESTAMP NULL
     );
