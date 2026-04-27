@@ -25,7 +25,8 @@ public class ApplicationStatus {
     private String status;
 
     @Schema(description = "論理削除フラグ", example = "false")
-    private boolean isDeleted;
+    private boolean deleted;
 
-    private LocalDateTime delete_at;
+    @Schema(description = "論理削除日時", example = "2026-01-01T00:00:00")
+    private LocalDateTime deletedAt;
 }
