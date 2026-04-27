@@ -12,9 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.dto.ApiResult;
 import raisetech.StudentManagement.dto.StudentIdResponse;
+import raisetech.StudentManagement.dto.StudentRegisterResponse;
 import raisetech.StudentManagement.service.StudentService;
 
 import java.util.List;
@@ -184,7 +186,8 @@ public class StudentRestController {
                                               "status": "success",
                                               "message": "登録処理が成功しました",
                                               "data": {
-                                                "studentId": "1"
+                                                "studentId": "1",
+                                                "studentCourseIds": ["10", "11"]
                                               }
                                             }
                                             """)
@@ -218,14 +221,23 @@ public class StudentRestController {
             )
     })
     @PostMapping
-    public ResponseEntity<ApiResult<StudentIdResponse>> registerStudent(
+    public ResponseEntity<ApiResult<StudentRegisterResponse>> registerStudent(
             @Valid @RequestBody StudentDetail studentDetail) {
+
         service.registerStudent(studentDetail);
+
+        List<String> studentCourseIds = studentDetail.getStudentCourseList().stream()
+                .map(StudentCourse::getId)
+                .toList();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ApiResult<>(
                         "success",
                         "登録処理が成功しました",
-                        new StudentIdResponse(studentDetail.getStudent().getId())
+                        new StudentRegisterResponse(
+                                studentDetail.getStudent().getId(),
+                                studentCourseIds
+                        )
                 )
         );
     }
@@ -358,6 +370,7 @@ public class StudentRestController {
                 )
         );
     }
+
     /**
      * 指定したIDの受講生情報を復元します。
      *
