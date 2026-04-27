@@ -3,6 +3,8 @@ package raisetech.StudentManagement.repository;
 import org.apache.ibatis.annotations.Mapper;
 import raisetech.StudentManagement.data.ApplicationStatus;
 
+import java.time.LocalDateTime;
+
 /**
  * 申込状況テーブルと紐づくRepositoryです。
  */
@@ -43,4 +45,10 @@ public interface ApplicationStatusRepository {
      * @param applicationStatus 申込状況
      */
     void restoreApplicationStatus(ApplicationStatus applicationStatus);
+
+    /**
+     * 一定期間が過ぎた論理削除された申込状況を物理削除します
+     * @param threshold　論理削除可能期限
+     */
+    void deleteOldDeletedApplicationStatuses(LocalDateTime threshold);
 }
