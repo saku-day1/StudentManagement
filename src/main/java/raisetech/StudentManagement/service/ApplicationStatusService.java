@@ -1,7 +1,6 @@
 package raisetech.StudentManagement.service;
 
 import jakarta.annotation.Nonnull;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.data.ApplicationStatus;
@@ -75,10 +74,10 @@ public class ApplicationStatusService {
      * 受講生コース情報に基づいて申込状況を確定します
      *
      * @param studentCourseId 受講生コース情報ID
-     * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
-     * @throws ApplicationStatusNotFoundException 申込状況がない場合
-     * @throws ApplicationStatusAlreadyDeletedException　論理削除されている場合
-     * @throws InvalidApplicationException        仮申込状態以外のステータスである場合
+     * @throws StudentCourseNotFoundException           指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException       申込状況がない場合
+     * @throws ApplicationStatusAlreadyDeletedException 論理削除されている場合
+     * @throws InvalidApplicationException              仮申込状態以外のステータスである場合
      */
     @Transactional
     public void confirmApplicationStatus(String studentCourseId) {
@@ -86,7 +85,7 @@ public class ApplicationStatusService {
         ApplicationStatus applicationStatus
                 = findApplicationStatusOrThrow(studentCourseId);
 
-        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
+        validateApplicationStatusNotDeleted(applicationStatus, studentCourseId);
 
         ApplicationStatusType statusType
                 = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
@@ -170,7 +169,7 @@ public class ApplicationStatusService {
     public void cancelApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
         ApplicationStatus applicationStatus = findApplicationStatusOrThrow(studentCourseId);
-        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
+        validateApplicationStatusNotDeleted(applicationStatus, studentCourseId);
         ApplicationStatusType statusType =
                 ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.isCancelable()) {
@@ -196,7 +195,7 @@ public class ApplicationStatusService {
     public void archiveCompletedApplicationStatus(String studentCourseId) {
         validateStudentCourseExists(studentCourseId);
         ApplicationStatus applicationStatus = findApplicationStatusOrThrow(studentCourseId);
-        validateApplicationStatusNotDeleted(applicationStatus,studentCourseId);
+        validateApplicationStatusNotDeleted(applicationStatus, studentCourseId);
         ApplicationStatusType statusType = ApplicationStatusType.fromLabel(applicationStatus.getStatus());
         if (!statusType.canArchive()) {
             throw new InvalidApplicationException(
@@ -210,11 +209,12 @@ public class ApplicationStatusService {
      * 申込状況の復元処理を行う。
      * 仮申込および本申込状態のみ対象とし、
      * 復元後は仮申込状態へ変更する。
+     *
      * @param studentCourseId 受講生コース情報ID
-     * @throws StudentCourseNotFoundException           指定した受講生コース情報IDが存在しない場合
-     * @throws ApplicationStatusNotFoundException       申込状況がない場合
-     * @throws ApplicationStatusAlreadyActiveException  すでに有効状態の場合
-     * @throws InvalidApplicationException              仮申込もしくは本申込状態以外の場合
+     * @throws StudentCourseNotFoundException          指定した受講生コース情報IDが存在しない場合
+     * @throws ApplicationStatusNotFoundException      申込状況がない場合
+     * @throws ApplicationStatusAlreadyActiveException すでに有効状態の場合
+     * @throws InvalidApplicationException             仮申込もしくは本申込状態以外の場合
      */
     @Transactional
     public void restoreApplicationStatus(String studentCourseId) {
@@ -240,6 +240,16 @@ public class ApplicationStatusService {
 
         applicationStatusRepository.restoreApplicationStatus(applicationStatus);
     }
+
+    /**
+     * 論理削除された申込処理のデータを６か月経過後に物理削除します。
+     */
+    @Transactional
+    public void deleteOldDeletedApplicationStatuses() {
+        LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
+        applicationStatusRepository.deleteOldDeletedApplicationStatuses(threshold);
+    }
+
     /**
      * 受講生コースIDに紐づく申込状況を取得します。
      * 申込状況が存在しない場合は例外をスローします。
@@ -258,12 +268,6 @@ public class ApplicationStatusService {
         return applicationStatus;
     }
 
-    @Scheduled(cron = "0 0 3 * * *")
-    @Transactional
-    public void deleteOldDeletedApplicationStatuses() {
-        LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
-        applicationStatusRepository.deleteOldDeletedApplicationStatuses(threshold);
-    }
     /**
      * 指定された受講生コースIDが存在することを確認します。
      *
@@ -276,11 +280,12 @@ public class ApplicationStatusService {
             throw new StudentCourseNotFoundException(studentCourseId);
         }
     }
+
     /**
      * 申込状況が論理削除されていないことを確認します。
      *
      * @param applicationStatus 確認対象の申込状況
-     * @param studentCourseId 受講生コースID
+     * @param studentCourseId   受講生コースID
      * @throws ApplicationStatusAlreadyDeletedException 申込状況が論理削除されている場合
      */
     private void validateApplicationStatusNotDeleted(
