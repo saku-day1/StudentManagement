@@ -80,7 +80,43 @@ class ApplicationStatusRestControllerTest {
     }
 
     @Test
-    void 本申込処理_本申込状態へ更新したときに成功メッセージが返ること() throws Exception{
+    void 仮申込作成処理_仮申込を作成したときに201が返ること() throws Exception {
+        String studentCourseId = "1";
+
+        mockMvc.perform(post("/api/student-courses/{studentCourseId}/application-status", studentCourseId))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.message").value("申込状況を作成しました"))
+                .andExpect(jsonPath("$.data").isEmpty());
+
+        verify(service, times(1)).createApplicationStatus(studentCourseId);
+    }
+
+    @Test
+    void 仮申込作成処理_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
+        String studentCourseId = "999";
+
+        doThrow(new StudentCourseNotFoundException(studentCourseId))
+                .when(service).createApplicationStatus(studentCourseId);
+
+        mockMvc.perform(post("/api/student-courses/{studentCourseId}/application-status", studentCourseId))
+                .andExpect(status().isNotFound());
+
+        verify(service, times(1)).createApplicationStatus(studentCourseId);
+    }
+
+    @Test
+    void 仮申込作成処理_受講生コースIDが不正な形式の場合に400エラーが返ること() throws Exception {
+        String studentCourseId = "abc";
+
+        mockMvc.perform(post("/api/student-courses/{studentCourseId}/application-status", studentCourseId))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).createApplicationStatus(any());
+    }
+
+    @Test
+    void 本申込処理_本申込状態へ更新したときに成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/confirm", studentCourseId))
@@ -91,6 +127,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).confirmApplicationStatus(studentCourseId);
     }
+
     @Test
     void 本申込_仮申込以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -108,6 +145,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).confirmApplicationStatus(studentCourseId);
     }
+
     @Test
     void 本申込_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
         String studentCourseId = "999";
@@ -122,8 +160,9 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).confirmApplicationStatus(studentCourseId);
     }
+
     @Test
-    void 受講中処理_受講中状態へ更新したときに成功メッセージが返ること() throws Exception{
+    void 受講中処理_受講中状態へ更新したときに成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/start", studentCourseId))
@@ -134,6 +173,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).startApplicationStatus(studentCourseId);
     }
+
     @Test
     void 受講中_本申込以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -151,6 +191,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).startApplicationStatus(studentCourseId);
     }
+
     @Test
     void 受講中_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
         String studentCourseId = "999";
@@ -165,8 +206,9 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).startApplicationStatus(studentCourseId);
     }
+
     @Test
-    void 受講終了_受講終了状態へ更新したときに成功メッセージが返ること() throws Exception{
+    void 受講終了_受講終了状態へ更新したときに成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/complete", studentCourseId))
@@ -177,6 +219,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).completeApplicationStatus(studentCourseId);
     }
+
     @Test
     void 受講終了_受講中以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -194,6 +237,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).completeApplicationStatus(studentCourseId);
     }
+
     @Test
     void 受講終了_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
         String studentCourseId = "999";
@@ -208,8 +252,9 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).completeApplicationStatus(studentCourseId);
     }
+
     @Test
-    void 申込キャンセル_申込のキャンセルを行ったとき成功メッセージが返ること() throws Exception{
+    void 申込キャンセル_申込のキャンセルを行ったとき成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/cancel", studentCourseId))
@@ -220,6 +265,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).cancelApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込キャンセル_すでにキャンセル済みの場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -235,6 +281,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).cancelApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込キャンセル_仮申込または本申込以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -252,8 +299,9 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).cancelApplicationStatus(studentCourseId);
     }
+
     @Test
-    void 申込状況の論理削除_申込状況の論理削除を行ったとき成功メッセージが返ること() throws Exception{
+    void 申込状況の論理削除_申込状況の論理削除を行ったとき成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(delete("/api/student-courses/{studentCourseId}/application-status/delete", studentCourseId))
@@ -264,6 +312,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).archiveCompletedApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込状況の論理削除_すでに論理削除済みの場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -279,6 +328,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).archiveCompletedApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込状況の論理削除_受講完了状態以外の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -296,8 +346,9 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).archiveCompletedApplicationStatus(studentCourseId);
     }
+
     @Test
-    void 申込状況の復元_申込状況の復元を行ったとき成功メッセージが返ること() throws Exception{
+    void 申込状況の復元_申込状況の復元を行ったとき成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/restore", studentCourseId))
@@ -308,6 +359,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).restoreApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込状況の復元_すでに有効状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -323,6 +375,7 @@ class ApplicationStatusRestControllerTest {
 
         verify(service, times(1)).restoreApplicationStatus(studentCourseId);
     }
+
     @Test
     void 申込状況の復元_仮申込または本申込以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
@@ -342,6 +395,6 @@ class ApplicationStatusRestControllerTest {
     }
 
 
-    }
+}
 
 

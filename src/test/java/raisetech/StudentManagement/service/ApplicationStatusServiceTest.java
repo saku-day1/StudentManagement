@@ -82,14 +82,14 @@ class ApplicationStatusServiceTest {
 
 
     @Test
-    void 初期申込作成処理_仮申込が自動作成されること() {
+    void 仮申込作成処理_仮申込が作成されること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
 
         when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
         when(applicationStatusRepository.searchApplicationStatusByStudentCourseId(studentCourseId)).thenReturn(null);
 
-        sut.createInitialApplicationStatus(studentCourseId);
+        sut.createApplicationStatus(studentCourseId);
 
         var captor = forClass(ApplicationStatus.class);
         verify(applicationStatusRepository, times(1)).createApplicationStatus(captor.capture());
@@ -102,11 +102,11 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 初期申込作成処理_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
+    void 仮申込作成処理_受講生コースIDが存在しない場合に例外処理が適切に行われること() {
         String studentCourseId = "999";
         when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(null);
 
-        assertThrows(StudentCourseNotFoundException.class, () -> sut.createInitialApplicationStatus(studentCourseId));
+        assertThrows(StudentCourseNotFoundException.class, () -> sut.createApplicationStatus(studentCourseId));
 
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, never()).searchApplicationStatusByStudentCourseId(any());
@@ -114,7 +114,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 初期申込作成処理_申込状況がすでに存在する場合に例外処理が適切に行われること() {
+    void 仮申込作成処理_申込状況がすでに存在する場合に例外処理が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus existingApplicationStatus = new ApplicationStatus();
@@ -125,7 +125,7 @@ class ApplicationStatusServiceTest {
         when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(studentCourse);
 
         assertThrows(StudentAlreadyAppliedException.class,
-                () -> sut.createInitialApplicationStatus(studentCourseId));
+                () -> sut.createApplicationStatus(studentCourseId));
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
         verify(applicationStatusRepository, never()).createApplicationStatus(any());

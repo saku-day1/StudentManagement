@@ -33,11 +33,9 @@ class StudentServiceTest {
 
     private StudentService sut;
 
-    private ApplicationStatusService applicationStatusService;
-
     @BeforeEach
     void before() {
-        sut = new StudentService(repository, converter,applicationStatusService);
+        sut = new StudentService(repository, converter);
     }
 
 

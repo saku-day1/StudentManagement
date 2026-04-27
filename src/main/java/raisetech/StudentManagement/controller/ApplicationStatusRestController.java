@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.controller;
 
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import raisetech.StudentManagement.data.ApplicationStatus;
@@ -35,6 +36,27 @@ public class ApplicationStatusRestController {
                 "success",
                 "申込状況を取得しました",
                 applicationStatus
+        );
+    }
+
+    /**
+     * 申込状況を新規作成します。
+     *
+     * @param studentCourseId 受講生コースID
+     * @return 成功メッセージを含むレスポンス
+     */
+    @PostMapping("/{studentCourseId}/application-status")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResult<Void> createApplicationStatus(
+            @PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
+            String studentCourseId) {
+
+        service.createApplicationStatus(studentCourseId);
+
+        return new ApiResult<>(
+                "success",
+                "申込状況を作成しました",
+                null
         );
     }
 
@@ -127,6 +149,7 @@ public class ApplicationStatusRestController {
                 null
         );
     }
+
     /**
      * 申込状況の復元を行います
      *
@@ -135,8 +158,8 @@ public class ApplicationStatusRestController {
      */
     @PatchMapping("/{studentCourseId}/application-status/restore")
     public ApiResult<Void> restoreApplicationStatus
-            (@PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
-             String studentCourseId) {
+    (@PathVariable @Pattern(regexp = "^\\d+$", message = "IDは数字で入力してください")
+     String studentCourseId) {
         service.restoreApplicationStatus(studentCourseId);
         return new ApiResult<>(
                 "success",
