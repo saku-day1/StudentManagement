@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.data.ApplicationStatus;
@@ -14,6 +15,8 @@ import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.exception.*;
 import raisetech.StudentManagement.repository.ApplicationStatusRepository;
 import raisetech.StudentManagement.repository.StudentRepository;
+
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -187,8 +190,9 @@ class ApplicationStatusServiceTest {
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
         verify(applicationStatusRepository, never()).updateApplicationStatus(any());
     }
+
     @Test
-    void 本申込処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+    void 本申込処理_論理削除されている場合に例外処理が適切に行われること() throws Exception {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -258,8 +262,9 @@ class ApplicationStatusServiceTest {
         verify(applicationStatusRepository, times(1)).searchApplicationStatusByStudentCourseId(studentCourseId);
         verify(applicationStatusRepository, never()).updateApplicationStatus(any());
     }
+
     @Test
-    void 受講開始処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+    void 受講開始処理_論理削除されている場合に例外処理が適切に行われること() throws Exception {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -347,7 +352,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_論理削除されている場合に例外処理が適切に行われること() throws Exception{
+    void 受講完了処理_論理削除されている場合に例外処理が適切に行われること() throws Exception {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -672,6 +677,21 @@ class ApplicationStatusServiceTest {
         verify(studentRepository, times(1)).searchStudentCourseById(studentCourseId);
         verify(applicationStatusRepository, never()).searchApplicationStatusByStudentCourseId(any());
         verify(applicationStatusRepository, never()).restoreApplicationStatus(any());
+    }
+
+    @Test
+    void 論理削除済み申込状況の物理削除処理が適切に行われること() {
+        sut.deleteOldDeletedApplicationStatuses();
+
+        ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
+
+        verify(applicationStatusRepository, times(1))
+                .deleteOldDeletedApplicationStatuses(captor.capture());
+
+        LocalDateTime threshold = captor.getValue();
+
+        assertTrue(threshold.isBefore(LocalDateTime.now()));
+        assertTrue(threshold.isAfter(LocalDateTime.now().minusMonths(6).minusSeconds(5)));
     }
 
     @Nonnull
