@@ -130,7 +130,7 @@ public class ApplicationStatusService {
     }
 
     /**
-     * 受講生コース情報に基づいて受講完了処理を行います
+     * 受講生コース情報に基づいて終了処理を行います
      *
      * @param studentCourseId 受講生コース情報ID
      * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
@@ -150,7 +150,7 @@ public class ApplicationStatusService {
         if (!statusType.canComplete()) {
             throw new InvalidApplicationException(
                     studentCourseId,
-                    "受講中のみ受講完了にできます。");
+                    "受講中のみ終了にできます。");
         }
         applicationStatus.setStatus(ApplicationStatusType.COMPLETED.getLabel());
         applicationStatusRepository.updateApplicationStatus(applicationStatus);
@@ -163,7 +163,7 @@ public class ApplicationStatusService {
      * @param studentCourseId 受講生コース情報ID
      * @throws StudentCourseNotFoundException     指定した受講生コース情報IDが存在しない場合
      * @throws ApplicationStatusNotFoundException 申込状況がない場合
-     * @throws InvalidApplicationException        受講中・受講完了のステータスである場合
+     * @throws InvalidApplicationException        受講中・終了のステータスである場合
      */
     @Transactional
     public void cancelApplicationStatus(String studentCourseId) {
@@ -181,9 +181,9 @@ public class ApplicationStatusService {
     }
 
     /**
-     * 受講完了済みの申込状況を論理削除（非表示化）する。
+     * 終了済みの申込状況を論理削除（非表示化）する。
      * 業務上は履歴整理のための処理であり、キャンセルとは異なる。
-     * 受講完了の場合のみ論理削除可能とし、それ以外の状態の場合は例外をスローします。
+     * 終了の場合のみ論理削除可能とし、それ以外の状態の場合は例外をスローします。
      *
      * @param studentCourseId 受講生コース情報ID
      * @throws StudentCourseNotFoundException           指定した受講生コース情報IDが存在しない場合
@@ -200,7 +200,7 @@ public class ApplicationStatusService {
         if (!statusType.canArchive()) {
             throw new InvalidApplicationException(
                     studentCourseId,
-                    "受講完了状態のみ非表示化できます。");
+                    "終了状態のみ非表示化できます。");
         }
         applicationStatusRepository.logicalDeleteApplicationStatus(applicationStatus);
     }

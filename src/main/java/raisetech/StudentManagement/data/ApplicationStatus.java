@@ -21,7 +21,7 @@ public class ApplicationStatus {
     private String studentCourseId;
 
     @Schema(description =
-            "申込ステータス（仮申込・本申込・受講中・受講完了）", example = "仮申込")
+            "申込ステータス（仮申込・本申込・受講中・終了）", example = "仮申込")
     private String status;
 
     @Schema(description = "論理削除フラグ", example = "false")

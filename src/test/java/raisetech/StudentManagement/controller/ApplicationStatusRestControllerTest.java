@@ -208,7 +208,7 @@ class ApplicationStatusRestControllerTest {
     }
 
     @Test
-    void 受講終了_受講終了状態へ更新したときに成功メッセージが返ること() throws Exception {
+    void 終了_終了状態へ更新したときに成功メッセージが返ること() throws Exception {
         String studentCourseId = "1";
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/complete", studentCourseId))
@@ -221,7 +221,7 @@ class ApplicationStatusRestControllerTest {
     }
 
     @Test
-    void 受講終了_受講中以外の状態の場合に409エラーが返ること() throws Exception {
+    void 終了_受講中以外の状態の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
 
         doThrow(new InvalidApplicationException(
@@ -239,7 +239,7 @@ class ApplicationStatusRestControllerTest {
     }
 
     @Test
-    void 受講終了_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
+    void 終了_受講生コースIDが存在しない場合に404エラーが返ること() throws Exception {
         String studentCourseId = "999";
 
         doThrow(new StudentCourseNotFoundException(studentCourseId))
@@ -330,7 +330,7 @@ class ApplicationStatusRestControllerTest {
     }
 
     @Test
-    void 申込状況の論理削除_受講完了状態以外の場合に409エラーが返ること() throws Exception {
+    void 申込状況の論理削除_終了状態以外の場合に409エラーが返ること() throws Exception {
         String studentCourseId = "1";
 
         doThrow(new InvalidApplicationException(
