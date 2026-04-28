@@ -214,7 +214,7 @@ class ApplicationStatusRestControllerTest {
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/complete", studentCourseId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
-                .andExpect(jsonPath("$.message").value("受講終了状況に更新しました"))
+                .andExpect(jsonPath("$.message").value("終了状況に更新しました"))
                 .andExpect(jsonPath("$.data").isEmpty());
 
         verify(service, times(1)).completeApplicationStatus(studentCourseId);
@@ -226,14 +226,14 @@ class ApplicationStatusRestControllerTest {
 
         doThrow(new InvalidApplicationException(
                 studentCourseId,
-                "受講中のみ受講完了にできます。"
+                "受講中のみ終了にできます。"
         )).when(service).completeApplicationStatus(studentCourseId);
 
         mockMvc.perform(patch("/api/student-courses/{studentCourseId}/application-status/complete", studentCourseId))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.message")
-                        .value("受講生コースID：" + studentCourseId + "：受講中のみ受講完了にできます。"));
+                        .value("受講生コースID：" + studentCourseId + "：受講中のみ終了にできます。"));
 
         verify(service, times(1)).completeApplicationStatus(studentCourseId);
     }
@@ -335,14 +335,14 @@ class ApplicationStatusRestControllerTest {
 
         doThrow(new InvalidApplicationException(
                 studentCourseId,
-                "受講完了状態のみ非表示化できます。"
+                "終了状態のみ非表示化できます。"
         )).when(service).archiveCompletedApplicationStatus(studentCourseId);
 
         mockMvc.perform(delete("/api/student-courses/{studentCourseId}/application-status/delete", studentCourseId))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.message")
-                        .value("受講生コースID：" + studentCourseId + "：受講完了状態のみ非表示化できます。"));
+                        .value("受講生コースID：" + studentCourseId + "：終了状態のみ非表示化できます。"));
 
         verify(service, times(1)).archiveCompletedApplicationStatus(studentCourseId);
     }

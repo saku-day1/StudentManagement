@@ -311,7 +311,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_受講完了処理が適切に行われること() {
+    void 終了処理_終了処理が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -334,7 +334,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_受講中以外の状態の場合に例外処理が適切に行われること() {
+    void 終了処理_受講中以外の状態の場合に例外処理が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -352,7 +352,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_論理削除されている場合に例外処理が適切に行われること() throws Exception {
+    void 終了処理_論理削除されている場合に例外処理が適切に行われること() throws Exception {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();
@@ -371,7 +371,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_申込状況が存在しない場合に例外処理が適切に行われること() {
+    void 終了処理_申込状況が存在しない場合に例外処理が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
 
@@ -387,7 +387,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 受講完了処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
+    void 終了処理_受講生コースIDが存在しない場合例外処理が適切に行われること() {
         String studentCourseId = "999";
         when(studentRepository.searchStudentCourseById(studentCourseId)).thenReturn(null);
 
@@ -493,7 +493,7 @@ class ApplicationStatusServiceTest {
     }
 
     @Test
-    void 完了状態の論理削除_受講完了した申込状況の論理削除が適切に行われること() {
+    void 完了状態の論理削除_終了した申込状況の論理削除が適切に行われること() {
         String studentCourseId = "1";
         StudentCourse studentCourse = createStudentCourse(studentCourseId);
         ApplicationStatus applicationStatus = new ApplicationStatus();

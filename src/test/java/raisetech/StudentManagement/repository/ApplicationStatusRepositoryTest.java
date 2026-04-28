@@ -58,7 +58,7 @@ class ApplicationStatusRepositoryTest {
     @ParameterizedTest
     @CsvSource({
             "4, 本申込",
-            "3, 受講終了"
+            "3, 終了"
     })
     void 申込状況の更新処理が行えること(String studentCourseId, String updateStatus) {
         ApplicationStatus applicationStatus =

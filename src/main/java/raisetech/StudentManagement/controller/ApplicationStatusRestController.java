@@ -313,24 +313,24 @@ public class ApplicationStatusRestController {
     }
 
     /**
-     * 申込状況を受講終了へ更新します
+     * 申込状況を終了へ更新します
      *
      * @param studentCourseId 受講生コースID
      * @return 成功メッセージを含むレスポンス
      */
     @Operation(
-            summary = "申込状況を受講終了へ更新",
-            description = "受講開始状態の申込状況を受講終了状態へ遷移させます。"
+            summary = "申込状況を終了へ更新",
+            description = "受講開始状態の申込状況を終了状態へ遷移させます。"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "受講終了への更新に成功",
+            description = "終了への更新に成功",
             content = @Content(
                     mediaType = "application/json",
                     examples = @ExampleObject(value = """
                             {
                               "status": "success",
-                              "message": "受講終了状況に更新しました",
+                              "message": "終了状況に更新しました",
                               "data": null
                             }
                             """)
@@ -362,12 +362,12 @@ public class ApplicationStatusRestController {
     )
     @ApiResponse(
             responseCode = "409",
-            description = "受講開始以外の状態のため受講終了へ更新できない",
+            description = "受講開始以外の状態のため終了へ更新できない",
             content = @Content(
                     mediaType = "application/json",
                     examples = @ExampleObject(value = """
                             {
-                              "message": "現在の申込状況では受講終了に更新できません。"
+                              "message": "現在の申込状況では終了に更新できません。"
                             }
                             """)
             )
@@ -379,7 +379,7 @@ public class ApplicationStatusRestController {
         service.completeApplicationStatus(studentCourseId);
         return new ApiResult<>(
                 "success",
-                "受講終了状況に更新しました",
+                "終了状況に更新しました",
                 null
         );
     }
@@ -464,7 +464,7 @@ public class ApplicationStatusRestController {
      */
     @Operation(
             summary = "申込状況の論理削除",
-            description = "受講終了状態の申込状況を論理削除します。削除された申込状況は履歴として保持されます。"
+            description = "終了状態の申込状況を論理削除します。削除された申込状況は履歴として保持されます。"
     )
     @ApiResponse(
             responseCode = "200",
@@ -506,7 +506,7 @@ public class ApplicationStatusRestController {
     )
     @ApiResponse(
             responseCode = "409",
-            description = "受講終了以外の状態のため削除できない",
+            description = "終了以外の状態のため削除できない",
             content = @Content(
                     mediaType = "application/json",
                     examples = @ExampleObject(value = """
