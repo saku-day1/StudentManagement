@@ -26,7 +26,8 @@ public class StudentService {
     private final StudentConverter converter;
 
     @Autowired
-    public StudentService(StudentRepository repository, StudentConverter converter) {
+    public StudentService(StudentRepository repository,
+                          StudentConverter converter) {
         this.repository = repository;
         this.converter = converter;
     }
@@ -60,7 +61,6 @@ public class StudentService {
         return new StudentDetail(student, studentCourse);
     }
 
-
     /**
      * 受講生詳細の登録を行います。
      * 受講生情報と受講生コース情報をそれぞれ登録し、
@@ -76,6 +76,7 @@ public class StudentService {
         if (repository.countByEmail(student.getEmail()) > 0) {
             throw new DuplicateEmailException(student.getEmail() + " はすでに使われているメールアドレスです");
         }
+
         repository.registerStudent(student);
 
         studentDetail.getStudentCourseList().forEach(studentCourse -> {
@@ -155,9 +156,3 @@ public class StudentService {
         repository.restoreStudent(id);
     }
 }
-
-
-
-
-
-

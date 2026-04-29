@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="raisetech.StudentManagement.repository.ApplicationStatusRepository">
+
+    <!--受講生コースIDに基づいた申込状況を検索　-->
+    <select id="searchApplicationStatusByStudentCourseId"
+            resultType="raisetech.StudentManagement.data.ApplicationStatus">
+        SELECT id,
+        student_course_id AS studentCourseId,
+        status,
+        is_deleted AS deleted,
+        deleted_at AS deletedAt
+        FROM application_status
+        WHERE student_course_id = #{studentCourseId}
+    </select>
+    <!--初期状態（仮申込）の申込状況を作成　-->
+    <insert id="createApplicationStatus"
+            parameterType="raisetech.StudentManagement.data.ApplicationStatus">
+        INSERT INTO application_status (
+        student_course_id,
+        status,
+        is_deleted
+        ) VALUES (
+        #{studentCourseId},
+        #{status},
+        false
+        )
+    </insert>
+    <!--申込状況の更新　-->
+    <update id="updateApplicationStatus"
+            parameterType="raisetech.StudentManagement.data.ApplicationStatus">
+        UPDATE application_status
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!--申込状況を論理削除　-->
+    <update id="logicalDeleteApplicationStatus"
+            parameterType="raisetech.StudentManagement.data.ApplicationStatus">
+        UPDATE application_status
+        SET is_deleted = true,
+        deleted_at = NOW()
+        WHERE id = #{id}
+        AND is_deleted = false
+    </update>
+
+    <!--申込状況を復元し、仮申込状態に戻す　-->
+    <update id="restoreApplicationStatus"
+            parameterType="raisetech.StudentManagement.data.ApplicationStatus">
+        UPDATE application_status
+        SET status = #{status},
+        is_deleted = false,
+        deleted_at = NULL
+        WHERE id = #{id}
+        AND is_deleted = true
+    </update>
+
+    <!--一定期間が過ぎた論理削除された申込状況を物理削除する　-->
+    <delete id="deleteOldDeletedApplicationStatuses">
+        DELETE FROM application_status
+        WHERE is_deleted = true
+        AND deleted_at &lt; #{threshold}
+    </delete>
+
+</mapper>

@@ -6,6 +6,7 @@ package raisetech.StudentManagement.exception;
 public class StudentAlreadyActiveException extends RuntimeException {
     /**
      * 例外メッセージを指定して例外を生成します。
+     *
      * @param id 受講生ID
      */
     public StudentAlreadyActiveException(String id) {

@@ -3,6 +3,7 @@ package raisetech.StudentManagement.repository;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @MybatisTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class StudentRepositoryTest {
 
     @Autowired
@@ -33,7 +35,7 @@ class StudentRepositoryTest {
     void 受講生コース情報の全件検索が行えること() {
         List<StudentCourse> actual = sut.searchStudentCourseList();
         //5件のデータがDBから返ってくることを想定
-        assertThat(actual).hasSize(5);
+        assertThat(actual).hasSize(6);
         //実際のデータが一致しているかコース内情報をすべて比較
         assertThat(actual)
                 .extracting(StudentCourse::getCourseName)
@@ -42,7 +44,8 @@ class StudentRepositoryTest {
                         "AWSコース",
                         "Webデザインコース",
                         "Javaコース",
-                        "AWSコース"
+                        "AWSコース",
+                        "Javaコース"
                 );
     }
 
@@ -106,7 +109,7 @@ class StudentRepositoryTest {
         studentCourse.setCourseEndAt(LocalDateTime.of(2027, 4, 22, 0, 0));
         sut.registerStudentCourse(studentCourse);
         List<StudentCourse> actual = sut.searchStudentCourseList();
-        assertThat(actual).hasSize(6);
+        assertThat(actual).hasSize(7);
 
     }
 

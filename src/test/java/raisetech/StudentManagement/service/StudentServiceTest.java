@@ -3,7 +3,6 @@ package raisetech.StudentManagement.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -171,7 +171,7 @@ class StudentServiceTest {
 
         sut.registerStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository).registerStudentCourse(captor.capture());
         StudentCourse capturedCourse = captor.getValue();
 
@@ -202,7 +202,7 @@ class StudentServiceTest {
 
         sut.registerStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository, times(2)).registerStudentCourse(captor.capture());
         List<StudentCourse> capturedCourses = captor.getAllValues();
 
@@ -237,7 +237,7 @@ class StudentServiceTest {
 
         sut.updateStudent(studentDetail);
 
-        ArgumentCaptor<StudentCourse> captor = ArgumentCaptor.forClass(StudentCourse.class);
+        var captor = forClass(StudentCourse.class);
         verify(repository, times(1)).updateStudent(student);
         verify(repository, times(1)).updateStudentCourse(captor.capture());
 
@@ -339,4 +339,5 @@ class StudentServiceTest {
         verify(repository, never()).restoreStudent("1");
         verify(repository).searchStudent("1");
     }
+
 }
