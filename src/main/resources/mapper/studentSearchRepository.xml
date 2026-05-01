@@ -4,6 +4,7 @@
 
     <!-- 検索条件に基づいて受講生サマリー情報を検索する -->
     <select id="searchStudentSummaries"
+            parameterType="raisetech.StudentManagement.dto.StudentSearchCriteria"
             resultType="raisetech.StudentManagement.dto.StudentSearchSummary">
         SELECT
         s.id AS studentId,

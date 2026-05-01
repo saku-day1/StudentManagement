@@ -4,7 +4,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
-import raisetech.StudentManagement.dto.StudentSearchCondition;
+import raisetech.StudentManagement.dto.StudentSearchCriteria;
 import raisetech.StudentManagement.dto.StudentSearchSummary;
 import raisetech.StudentManagement.service.StudentSearchService;
 
@@ -21,7 +21,7 @@ public class StudentSearchRestController {
 
     @GetMapping("/api/students/search")
     public List<StudentSearchSummary> searchStudentSummaries(
-            @Validated  @ModelAttribute StudentSearchCondition condition) {
+            @Validated  @ModelAttribute StudentSearchCriteria condition) {
         return service.searchStudentSummaries(condition);
     }
 }

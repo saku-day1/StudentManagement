@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import raisetech.StudentManagement.dto.StudentSearchCondition;
+import raisetech.StudentManagement.dto.StudentSearchCriteria;
 import raisetech.StudentManagement.dto.StudentSearchSummary;
 import raisetech.StudentManagement.service.StudentSearchService;
 
@@ -53,8 +53,8 @@ class StudentSearchRestControllerTest {
                 .andExpect(jsonPath("$[0].courseName").value("Webデザインコース"))
                 .andExpect(jsonPath("$[0].status").value("仮申込"));
 
-        ArgumentCaptor<StudentSearchCondition> captor =
-                ArgumentCaptor.forClass(StudentSearchCondition.class);
+        ArgumentCaptor<StudentSearchCriteria> captor =
+                ArgumentCaptor.forClass(StudentSearchCriteria.class);
 
         verify(service, times(1)).searchStudentSummaries(captor.capture());
 

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentSearchCondition {
+public class StudentSearchCriteria {
 
     private String name;
 
