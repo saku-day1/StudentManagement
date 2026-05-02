@@ -29,10 +29,10 @@
             <if test="courseName != null and courseName != ''">
                 AND sc.course_name = #{courseName}
             </if>
-            <if test="studentId != null and studentId != ''">
+            <if test="studentId != null">
                 AND s.id = #{studentId}
             </if>
-            <if test="studentCourseId != null and studentCourseId != ''">
+            <if test="studentCourseId != null">
                 AND sc.id = #{studentCourseId}
             </if>
             <if test="status != null and status != ''">
