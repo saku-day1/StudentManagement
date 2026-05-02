@@ -1,4 +1,4 @@
-﻿-- search-test-data.sql
+-- search-test-data.sql
 
 DELETE FROM application_status;
 DELETE FROM student_courses;
