@@ -32,7 +32,7 @@ class StudentSearchServiceTest {
         criteria.setName("田中");
 
         StudentSearchSummary summary = new StudentSearchSummary();
-        summary.setStudentId("1");
+        summary.setStudentId(1);
         summary.setName("田中啓介");
 
         when(repository.searchStudentSummaries(criteria)).thenReturn(List.of(summary));
@@ -40,7 +40,7 @@ class StudentSearchServiceTest {
         List<StudentSearchSummary> actual = sut.searchStudentSummaries(criteria);
 
         assertEquals(1,actual.size());
-        assertEquals("1", actual.get(0).getStudentId());
+        assertEquals(1, actual.get(0).getStudentId());
         assertEquals("田中啓介", actual.get(0).getName());
 
         verify(repository, times(1)).searchStudentSummaries(criteria);
@@ -49,7 +49,7 @@ class StudentSearchServiceTest {
     @Test
     void 該当データがない場合に空リストを返すこと() {
         StudentSearchCriteria criteria = new StudentSearchCriteria();
-        criteria.setStudentId("999");
+        criteria.setStudentId(999);
 
         when(repository.searchStudentSummaries(criteria))
                 .thenReturn(List.of());

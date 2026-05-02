@@ -15,8 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudentSearchSummary {
-    private String studentId;
-    private String studentCourseId;
+    private Integer studentId;
+    private Integer studentCourseId;
     private String name;
     private String furigana;
     private String email;

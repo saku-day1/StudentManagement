@@ -1,6 +1,6 @@
 package raisetech.StudentManagement.dto;
 
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +21,11 @@ public class StudentSearchCriteria {
 
     private String courseName;
 
-    @Pattern(regexp = "^\\d+$", message = "受講生IDは数字で入力してください")
-    private String studentId;
+    @Positive
+    private Integer studentId;
 
-    @Pattern(regexp = "^\\d+$", message = "受講生コースIDは数字で入力してください")
-    private String studentCourseId;
+    @Positive
+    private Integer studentCourseId;
 
     private String status;
 }

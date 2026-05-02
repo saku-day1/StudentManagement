@@ -56,8 +56,8 @@ public class StudentSearchRestController {
                             value = """
                                     [
                                       {
-                                        "studentId": "1",
-                                        "studentCourseId": "1",
+                                        "studentId": 1,
+                                        "studentCourseId": 1,
                                         "name": "田中啓介",
                                         "furigana": "タナカケイスケ",
                                         "email": "keisuke@example.com",
